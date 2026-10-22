@@ -1,0 +1,6 @@
+{
+  "name": "AMOX Photography & Film",
+  "description": "Zvanični dvojezični editorial portfolio sajt za fotografske i video usluge — AMOX Photography & Film.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
