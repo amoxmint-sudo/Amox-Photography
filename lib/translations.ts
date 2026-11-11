@@ -134,6 +134,11 @@ export interface TranslationSchema {
     optionalBadge: string;
     directContactTitle: string;
     clientGalleryTitle: string;
+    formKicker: string;
+    formTitle: string;
+    formDescription: string;
+    formResponseNote: string;
+    formPrivacyNote: string;
   };
   lightbox: {
     close: string;
@@ -293,6 +298,14 @@ export const translations: Record<'sr' | 'en', TranslationSchema> = {
       optionalBadge: 'opciono',
       directContactTitle: 'Direktan kontakt',
       clientGalleryTitle: 'Galerija za klijente',
+      formKicker: 'Formular za upit i rezervaciju termina',
+      formTitle: 'Ispričajte nam više o vašem događaju ili projektu',
+      formDescription:
+        'Popunite polja ispod sa osnovnim informacijama o planiranom datumu, lokaciji i vrsti angažmana. Svakom upitu pristupamo individualno i odgovaramo sa dostupnošću termina i predlogom saradnje.',
+      formResponseNote:
+        'Odgovaramo na sve upite u roku od 24 sata sa informacijom o slobodnom terminu i okvirnom ponudom.',
+      formPrivacyNote:
+        'Vaši podaci se šalju direktno i koriste isključivo za odgovor na vaš upit i dogovor oko saradnje.',
     },
     lightbox: {
       close: 'Zatvori prikaz (Esc)',
@@ -450,6 +463,14 @@ export const translations: Record<'sr' | 'en', TranslationSchema> = {
       optionalBadge: 'optional',
       directContactTitle: 'Direct Inquiries',
       clientGalleryTitle: 'Client Gallery Platform',
+      formKicker: 'Inquiry & Date Reservation Form',
+      formTitle: 'Tell us more about your event or project',
+      formDescription:
+        'Fill in the fields below with key details about your planned date, location, and type of engagement. We approach every inquiry individually and reply with availability and a tailored proposal.',
+      formResponseNote:
+        'We respond to all inquiries within 24 hours with date availability and a tailored quote.',
+      formPrivacyNote:
+        'Your details are sent directly and used solely to respond to your inquiry and coordinate our collaboration.',
     },
     lightbox: {
       close: 'Close viewer (Esc)',

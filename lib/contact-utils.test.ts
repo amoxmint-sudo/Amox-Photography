@@ -5,6 +5,9 @@ import {
   buildMailtoUrl,
   formatPlainTextInquiry,
   getLocalizedServiceLabel,
+  buildWeb3FormsPayload,
+  WEB3FORMS_ENDPOINT,
+  WEB3FORMS_ACCESS_KEY,
 } from './contact-utils';
 import { SITE_CONFIG } from './site-config';
 import { PACKAGES_DATA, PORTFOLIO_CATEGORIES } from './portfolio-data';
@@ -94,6 +97,34 @@ test('formatPlainTextInquiry includes all provided info', () => {
   assert.ok(text.includes('Beograd'));
 });
 
+test('buildWeb3FormsPayload includes access_key and all 7 form fields', () => {
+  assert.equal(WEB3FORMS_ENDPOINT, 'https://api.web3forms.com/submit');
+  assert.equal(WEB3FORMS_ACCESS_KEY, 'b5d0fd6c-e735-4d7b-bd5e-ddb63c891143');
+
+  const payload = buildWeb3FormsPayload(
+    {
+      fullName: 'Marija Jovanović',
+      email: 'marija@example.com',
+      phone: '+381 60 123 4567',
+      serviceType: 'Venčanja',
+      eventDate: '15. septembar 2027.',
+      location: 'Beograd',
+      message: 'Želimo fotografisanje i snimanje.',
+    },
+    'sr'
+  );
+
+  assert.equal(payload.access_key, 'b5d0fd6c-e735-4d7b-bd5e-ddb63c891143');
+  assert.equal(payload.fullName, 'Marija Jovanović');
+  assert.equal(payload.name, 'Marija Jovanović');
+  assert.equal(payload.email, 'marija@example.com');
+  assert.equal(payload.phone, '+381 60 123 4567');
+  assert.equal(payload.serviceType, 'Venčanja');
+  assert.equal(payload.eventDate, '15. septembar 2027.');
+  assert.equal(payload.location, 'Beograd');
+  assert.equal(payload.message, 'Želimo fotografisanje i snimanje.');
+});
+
 test('PORTFOLIO_CATEGORIES has 6 separate cards (3x2 grid) with separate video filming and video editing cards, while PACKAGES_DATA and inquiry options also preserve both services', () => {
   assert.equal(PORTFOLIO_CATEGORIES.length, 6);
   assert.deepEqual(
@@ -143,3 +174,4 @@ test('PORTFOLIO_CATEGORIES has 6 separate cards (3x2 grid) with separate video f
   );
   assert.ok(editInquiryEn.includes('Service Type: Video Editing & Post-Production'));
 });
+

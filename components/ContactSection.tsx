@@ -10,8 +10,8 @@ import {
   CONTACT_SERVICE_OPTIONS,
   getLocalizedServiceLabel,
   validateContactForm,
-  buildMailtoUrl,
-  formatPlainTextInquiry,
+  buildWeb3FormsPayload,
+  WEB3FORMS_ENDPOINT,
   ValidationErrors,
 } from '@/lib/contact-utils';
 import {
@@ -20,11 +20,9 @@ import {
   Instagram,
   Youtube,
   ExternalLink,
-  Copy,
   Check,
   Send,
   AlertCircle,
-  HelpCircle,
 } from 'lucide-react';
 import { EditorialReveal } from './EditorialReveal';
 
@@ -56,7 +54,9 @@ export function ContactSection({
   // Tracks which preselectionVersion the user manually overrode
   const [manualOverrideVersion, setManualOverrideVersion] = useState<number>(-1);
   const [errors, setErrors] = useState<ValidationErrors>({});
-  const [copied, setCopied] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // If user clicked a package/service CTA more recently than their last manual dropdown change,
   // use the preselected service; otherwise use their manual selection.
@@ -80,12 +80,15 @@ export function ContactSection({
     if (errors[name as keyof ValidationErrors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+    if (submitError) {
+      setSubmitError(null);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const submissionData = {
+    const submissionData: ContactFormData = {
       ...formData,
       serviceType: effectiveServiceType,
     };
@@ -97,24 +100,39 @@ export function ContactSection({
     }
 
     setErrors({});
-    const mailtoUrl = buildMailtoUrl(submissionData, lang);
-    window.location.href = mailtoUrl;
-  };
+    setSubmitError(null);
+    setIsSubmitting(true);
 
-  const handleCopy = async () => {
-    const text = formatPlainTextInquiry(
-      {
-        ...formData,
-        serviceType: effectiveServiceType,
-      },
-      lang
-    );
     try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
+      const payload = buildWeb3FormsPayload(submissionData, lang);
+      const response = await fetch(WEB3FORMS_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (response.ok && (!result || result.success !== false)) {
+        setIsSubmitted(true);
+      } else {
+        setSubmitError(
+          lang === 'sr'
+            ? 'Došlo je do greške pri slanju upita. Molimo pokušajte ponovo.'
+            : 'An error occurred while sending your inquiry. Please try again.'
+        );
+      }
     } catch {
-      // Fallback
+      setSubmitError(
+        lang === 'sr'
+          ? 'Došlo je do greške pri slanju upita. Molimo proverite internet vezu i pokušajte ponovo.'
+          : 'An error occurred while sending your inquiry. Please check your connection and try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -151,166 +169,85 @@ export function ContactSection({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start lg:items-stretch">
-          {/* Left Column: Contact Form */}
+          {/* Left Column: Contact Form or Success Message */}
           <EditorialReveal
             variant="section"
             delay={0.08}
             className="lg:col-span-7 bg-white p-6 sm:p-10 border border-[#EAE3D9] shadow-sm flex flex-col justify-between"
           >
-            <form onSubmit={handleSubmit} noValidate className="space-y-6">
-              {/* Full Name */}
-              <div>
-                <label
-                  htmlFor="fullName"
-                  className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
-                >
-                  <span>{t.contactPage.nameLabel}</span>
-                  <span className="text-[10px] text-[#8C5835] lowercase font-mono">
-                    *{t.contactPage.requiredBadge}
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  required
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder={t.contactPage.namePlaceholder}
-                  aria-invalid={!!errors.fullName}
-                  aria-describedby={errors.fullName ? 'fullName-error' : undefined}
-                  className={`w-full px-4 py-3 text-sm bg-[#FAF8F5] border rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 ${
-                    errors.fullName
-                      ? 'border-red-500 focus:ring-red-500'
-                      : 'border-[#E0D7CB] hover:border-[#C5B8A8] focus:ring-[#8C5835] focus:border-[#8C5835]'
-                  } transition-all duration-200`}
-                />
-                <AnimatePresence>
-                  {errors.fullName && (
-                    <motion.p
-                      key="fullName-err"
-                      id="fullName-error"
-                      initial={{ opacity: 0, y: -6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.2 }}
-                      className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5"
-                    >
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{errors.fullName}</span>
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Email Address */}
-              <div>
-                <label
-                  htmlFor="email"
-                  className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
-                >
-                  <span>{t.contactPage.emailLabel}</span>
-                  <span className="text-[10px] text-[#8C5835] lowercase font-mono">
-                    *{t.contactPage.requiredBadge}
-                  </span>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder={t.contactPage.emailPlaceholder}
-                  aria-invalid={!!errors.email}
-                  aria-describedby={errors.email ? 'email-error' : undefined}
-                  className={`w-full px-4 py-3 text-sm bg-[#FAF8F5] border rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 ${
-                    errors.email
-                      ? 'border-red-500 focus:ring-red-500'
-                      : 'border-[#E0D7CB] hover:border-[#C5B8A8] focus:ring-[#8C5835] focus:border-[#8C5835]'
-                  } transition-all duration-200`}
-                />
-                <AnimatePresence>
-                  {errors.email && (
-                    <motion.p
-                      key="email-err"
-                      id="email-error"
-                      initial={{ opacity: 0, y: -6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.2 }}
-                      className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5"
-                    >
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{errors.email}</span>
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Phone & Service Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Phone */}
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
-                  >
-                    <span>{t.contactPage.phoneLabel}</span>
-                    <span className="text-[10px] text-stone-400 lowercase font-mono">
-                      {t.contactPage.optionalBadge}
-                    </span>
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder={t.contactPage.phonePlaceholder}
-                    className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
-                  />
+            {isSubmitted ? (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                role="status"
+                aria-live="polite"
+                className="my-auto py-14 sm:py-20 px-6 sm:px-10 text-center bg-[#FAF8F5] border border-[#E0D7CB]"
+              >
+                <div className="w-12 h-12 mx-auto mb-6 flex items-center justify-center bg-white border border-[#8C5835] text-[#8C5835]">
+                  <Check className="w-5 h-5" />
                 </div>
 
-                {/* Service Type */}
+                <span className="text-[11px] font-mono uppercase tracking-[0.24em] text-[#8C5835] block mb-3">
+                  AMOX PHOTOGRAPHY & FILM
+                </span>
+
+                <p className="text-xl sm:text-2xl font-serif-editorial text-[#211B17] leading-relaxed max-w-lg mx-auto">
+                  Vaš upit je uspešno poslat! Javićemo vam se u najkraćem mogućem roku.
+                </p>
+
+                <p className="mt-4 text-xs sm:text-sm text-[#6E645A] leading-relaxed max-w-md mx-auto">
+                  {lang === 'sr'
+                    ? 'Hvala vam na poverenju. Vaši podaci su primljeni i odgovorićemo vam sa informacijama o dostupnosti termina i predlogom saradnje.'
+                    : 'Thank you for your trust. Your details have been received and we will get back to you shortly with availability and a tailored proposal.'}
+                </p>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate className="space-y-6 flex-1 flex flex-col justify-between">
+                {/* Form Intro Header */}
+                <div className="pb-6 border-b border-[#EAE3D9]">
+                  <span className="text-[11px] uppercase tracking-[0.22em] font-mono text-[#8C5835] block mb-2">
+                    {t.contactPage.formKicker}
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-serif-editorial text-[#211B17] tracking-tight">
+                    {t.contactPage.formTitle}
+                  </h3>
+                  <p className="mt-2.5 text-xs sm:text-sm text-[#6E645A] leading-relaxed">
+                    {t.contactPage.formDescription}
+                  </p>
+                </div>
+                {/* Full Name */}
                 <div>
                   <label
-                    htmlFor="serviceType"
+                    htmlFor="fullName"
                     className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
                   >
-                    <span>{t.contactPage.serviceLabel}</span>
+                    <span>{t.contactPage.nameLabel}</span>
                     <span className="text-[10px] text-[#8C5835] lowercase font-mono">
                       *{t.contactPage.requiredBadge}
                     </span>
                   </label>
-                  <select
-                    id="serviceType"
-                    name="serviceType"
+                  <input
+                    type="text"
+                    id="fullName"
+                    name="fullName"
                     required
-                    value={effectiveServiceType}
+                    value={formData.fullName}
                     onChange={handleChange}
-                    aria-invalid={!!errors.serviceType}
-                    aria-describedby={errors.serviceType ? 'serviceType-error' : undefined}
-                    className={`w-full px-4 py-3 text-sm bg-[#FAF8F5] border rounded-none text-[#211B17] focus:bg-white focus:outline-none focus:ring-1 ${
-                      errors.serviceType
+                    placeholder={t.contactPage.namePlaceholder}
+                    aria-invalid={!!errors.fullName}
+                    aria-describedby={errors.fullName ? 'fullName-error' : undefined}
+                    className={`w-full px-4 py-3 text-sm bg-[#FAF8F5] border rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 ${
+                      errors.fullName
                         ? 'border-red-500 focus:ring-red-500'
                         : 'border-[#E0D7CB] hover:border-[#C5B8A8] focus:ring-[#8C5835] focus:border-[#8C5835]'
                     } transition-all duration-200`}
-                  >
-                    <option value="" disabled>
-                      {t.contactPage.serviceSelectPlaceholder}
-                    </option>
-                    {serviceOptions.map((opt) => (
-                      <option key={opt.key} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                  />
                   <AnimatePresence>
-                    {errors.serviceType && (
+                    {errors.fullName && (
                       <motion.p
-                        key="service-err"
-                        id="serviceType-error"
+                        key="fullName-err"
+                        id="fullName-error"
                         initial={{ opacity: 0, y: -6 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
@@ -318,143 +255,232 @@ export function ContactSection({
                         className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5"
                       >
                         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        <span>{errors.serviceType}</span>
+                        <span>{errors.fullName}</span>
                       </motion.p>
                     )}
                   </AnimatePresence>
                 </div>
-              </div>
 
-              {/* Date & Location Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* Email Address */}
                 <div>
                   <label
-                    htmlFor="eventDate"
+                    htmlFor="email"
                     className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
                   >
-                    <span>{t.contactPage.dateLabel}</span>
-                    <span className="text-[10px] text-stone-400 lowercase font-mono">
-                      {t.contactPage.optionalBadge}
+                    <span>{t.contactPage.emailLabel}</span>
+                    <span className="text-[10px] text-[#8C5835] lowercase font-mono">
+                      *{t.contactPage.requiredBadge}
                     </span>
                   </label>
                   <input
-                    type="text"
-                    id="eventDate"
-                    name="eventDate"
-                    value={formData.eventDate}
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    value={formData.email}
                     onChange={handleChange}
-                    placeholder={t.contactPage.datePlaceholder}
-                    className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
+                    placeholder={t.contactPage.emailPlaceholder}
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? 'email-error' : undefined}
+                    className={`w-full px-4 py-3 text-sm bg-[#FAF8F5] border rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 ${
+                      errors.email
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-[#E0D7CB] hover:border-[#C5B8A8] focus:ring-[#8C5835] focus:border-[#8C5835]'
+                    } transition-all duration-200`}
                   />
+                  <AnimatePresence>
+                    {errors.email && (
+                      <motion.p
+                        key="email-err"
+                        id="email-error"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.2 }}
+                        className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5"
+                      >
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{errors.email}</span>
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="location"
-                    className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
-                  >
-                    <span>{t.contactPage.locationLabel}</span>
-                    <span className="text-[10px] text-stone-400 lowercase font-mono">
-                      {t.contactPage.optionalBadge}
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    placeholder={t.contactPage.locationPlaceholder}
-                    className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
-                  />
-                </div>
-              </div>
+                {/* Phone & Service Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Phone */}
+                  <div>
+                    <label
+                      htmlFor="phone"
+                      className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
+                    >
+                      <span>{t.contactPage.phoneLabel}</span>
+                      <span className="text-[10px] text-stone-400 lowercase font-mono">
+                        {t.contactPage.optionalBadge}
+                      </span>
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder={t.contactPage.phonePlaceholder}
+                      className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
+                    />
+                  </div>
 
-              {/* Message */}
-              <div>
-                <label
-                  htmlFor="message"
-                  className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
-                >
-                  <span>{t.contactPage.messageLabel}</span>
-                  <span className="text-[10px] text-stone-400 lowercase font-mono">
-                    {t.contactPage.optionalBadge}
-                  </span>
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={4}
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder={t.contactPage.messagePlaceholder}
-                  className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
-                />
-              </div>
-
-              {/* Submit CTA */}
-              <div>
-                <button
-                  type="submit"
-                  className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 text-xs font-medium uppercase tracking-[0.2em] text-white bg-[#211B17] hover:bg-[#8C5835] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8C5835]"
-                >
-                  <Send className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                  <span>{t.contactPage.submitButton}</span>
-                </button>
-              </div>
-
-              {/* Crucial honest explanatory notice */}
-              <div className="pt-2 border-t border-[#EAE3D9]">
-                <p className="text-xs text-[#6E645A] leading-relaxed flex items-start gap-2">
-                  <HelpCircle className="w-4 h-4 text-[#8C5835] shrink-0 mt-0.5" />
-                  <span>{t.contactPage.notice}</span>
-                </p>
-
-                {/* Instant Copy Fallback with animated state feedback */}
-                <div className="mt-4 p-3 bg-[#FAF8F5] border border-[#E0D7CB] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                  <span className="text-[#6E645A]">
-                    {t.contactPage.fallbackHelp}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    className={`shrink-0 inline-flex items-center gap-2 px-3.5 py-2 bg-white border rounded-none transition-all duration-200 active:scale-[0.98] ${
-                      copied
-                        ? 'border-emerald-600 bg-emerald-50/40'
-                        : 'border-[#D5CCC0] hover:border-[#8C5835] text-[#211B17]'
-                    }`}
-                  >
-                    <AnimatePresence mode="wait" initial={false}>
-                      {copied ? (
-                        <motion.span
-                          key="copied-state"
-                          initial={{ opacity: 0, scale: 0.92 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.92 }}
-                          transition={{ duration: 0.16 }}
-                          className="inline-flex items-center gap-1.5 text-emerald-700 font-medium"
+                  {/* Service Type */}
+                  <div>
+                    <label
+                      htmlFor="serviceType"
+                      className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
+                    >
+                      <span>{t.contactPage.serviceLabel}</span>
+                      <span className="text-[10px] text-[#8C5835] lowercase font-mono">
+                        *{t.contactPage.requiredBadge}
+                      </span>
+                    </label>
+                    <select
+                      id="serviceType"
+                      name="serviceType"
+                      required
+                      value={effectiveServiceType}
+                      onChange={handleChange}
+                      aria-invalid={!!errors.serviceType}
+                      aria-describedby={errors.serviceType ? 'serviceType-error' : undefined}
+                      className={`w-full px-4 py-3 text-sm bg-[#FAF8F5] border rounded-none text-[#211B17] focus:bg-white focus:outline-none focus:ring-1 ${
+                        errors.serviceType
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-[#E0D7CB] hover:border-[#C5B8A8] focus:ring-[#8C5835] focus:border-[#8C5835]'
+                      } transition-all duration-200`}
+                    >
+                      <option value="" disabled>
+                        {t.contactPage.serviceSelectPlaceholder}
+                      </option>
+                      {serviceOptions.map((opt) => (
+                        <option key={opt.key} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <AnimatePresence>
+                      {errors.serviceType && (
+                        <motion.p
+                          key="service-err"
+                          id="serviceType-error"
+                          initial={{ opacity: 0, y: -6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: 0.2 }}
+                          className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5"
                         >
-                          <Check className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{t.contactPage.copiedText}</span>
-                        </motion.span>
-                      ) : (
-                        <motion.span
-                          key="copy-state"
-                          initial={{ opacity: 0, scale: 0.92 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.92 }}
-                          transition={{ duration: 0.16 }}
-                          className="inline-flex items-center gap-1.5"
-                        >
-                          <Copy className="w-3.5 h-3.5 text-[#8C5835]" />
-                          <span>{t.contactPage.copyButton}</span>
-                        </motion.span>
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{errors.serviceType}</span>
+                        </motion.p>
                       )}
                     </AnimatePresence>
-                  </button>
+                  </div>
                 </div>
-              </div>
-            </form>
+
+                {/* Date & Location Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      htmlFor="eventDate"
+                      className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
+                    >
+                      <span>{t.contactPage.dateLabel}</span>
+                      <span className="text-[10px] text-stone-400 lowercase font-mono">
+                        {t.contactPage.optionalBadge}
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      id="eventDate"
+                      name="eventDate"
+                      value={formData.eventDate}
+                      onChange={handleChange}
+                      placeholder={t.contactPage.datePlaceholder}
+                      className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="location"
+                      className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
+                    >
+                      <span>{t.contactPage.locationLabel}</span>
+                      <span className="text-[10px] text-stone-400 lowercase font-mono">
+                        {t.contactPage.optionalBadge}
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      id="location"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      placeholder={t.contactPage.locationPlaceholder}
+                      className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
+                    />
+                  </div>
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label
+                    htmlFor="message"
+                    className="flex items-center justify-between text-xs font-medium uppercase tracking-wider text-[#211B17] mb-2"
+                  >
+                    <span>{t.contactPage.messageLabel}</span>
+                    <span className="text-[10px] text-stone-400 lowercase font-mono">
+                      {t.contactPage.optionalBadge}
+                    </span>
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows={4}
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder={t.contactPage.messagePlaceholder}
+                    className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
+                  />
+                </div>
+
+                {submitError && (
+                  <p className="text-xs text-red-600 flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{submitError}</span>
+                  </p>
+                )}
+
+                {/* Submit CTA & Reassurance Notes */}
+                <div className="pt-2 space-y-5">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 text-xs font-medium uppercase tracking-[0.2em] text-white bg-[#211B17] hover:bg-[#8C5835] disabled:opacity-70 disabled:pointer-events-none hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8C5835]"
+                  >
+                    <Send className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    <span>{isSubmitting ? 'Slanje...' : t.contactPage.submitButton}</span>
+                  </button>
+
+                  <div className="pt-5 border-t border-[#EAE3D9] space-y-2.5">
+                    <p className="text-xs text-[#574E46] leading-relaxed flex items-start gap-2.5">
+                      <Check className="w-3.5 h-3.5 text-[#8C5835] shrink-0 mt-0.5" />
+                      <span>{t.contactPage.formResponseNote}</span>
+                    </p>
+                    <p className="text-xs text-[#6E645A] leading-relaxed flex items-start gap-2.5">
+                      <Check className="w-3.5 h-3.5 text-[#8C5835] shrink-0 mt-0.5" />
+                      <span>{t.contactPage.formPrivacyNote}</span>
+                    </p>
+                  </div>
+                </div>
+              </form>
+            )}
           </EditorialReveal>
 
           {/* Right Column: Direct Info, Social, Pic-Time & Senja */}

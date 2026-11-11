@@ -220,3 +220,45 @@ export function formatPlainTextInquiry(data: ContactFormData, lang: Language = '
     data.message?.trim() || (isSr ? 'Bez dodatne poruke.' : 'No message provided.'),
   ].join('\n');
 }
+
+export const WEB3FORMS_ENDPOINT = 'https://api.web3forms.com/submit';
+export const WEB3FORMS_ACCESS_KEY = 'b5d0fd6c-e735-4d7b-bd5e-ddb63c891143';
+
+export interface Web3FormsPayload {
+  access_key: string;
+  subject: string;
+  from_name: string;
+  name: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  serviceType: string;
+  eventDate: string;
+  location: string;
+  message: string;
+}
+
+export function buildWeb3FormsPayload(
+  data: ContactFormData,
+  lang: Language = 'sr'
+): Web3FormsPayload {
+  const serviceLabel = data.serviceType
+    ? getLocalizedServiceLabel(data.serviceType, lang)
+    : '';
+  const cleanName = data.fullName.trim();
+
+  return {
+    access_key: WEB3FORMS_ACCESS_KEY,
+    subject: `[AMOX Upit] ${serviceLabel || 'Kontakt'} - ${cleanName}`,
+    from_name: cleanName,
+    name: cleanName,
+    fullName: cleanName,
+    email: data.email.trim(),
+    phone: data.phone?.trim() || '',
+    serviceType: serviceLabel,
+    eventDate: data.eventDate?.trim() || '',
+    location: data.location?.trim() || '',
+    message: data.message?.trim() || '',
+  };
+}
+
