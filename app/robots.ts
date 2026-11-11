@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
-import { SITE_CONFIG } from '@/lib/site-config';
+import { getVerifiedProductionSiteUrl } from '@/lib/seo';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = SITE_CONFIG.siteUrl || '';
+  const baseUrl = getVerifiedProductionSiteUrl();
 
   return {
     rules: {
@@ -10,6 +10,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/'],
     },
-    sitemap: baseUrl ? `${baseUrl}/sitemap.xml` : undefined,
+    ...(baseUrl ? { sitemap: `${baseUrl}/sitemap.xml` } : {}),
   };
 }
+

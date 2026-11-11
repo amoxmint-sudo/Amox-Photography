@@ -35,6 +35,116 @@
   }
 }
 
+/* Cinematic slow camera zoom for Hero background */
+@keyframes heroSlowZoom {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.075) translate3d(0, -1%, 0);
+  }
+}
+
+.animate-hero-zoom {
+  animation: heroSlowZoom 22s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite alternate;
+  will-change: transform;
+}
+
+/* Discreet vertical scroll indicator pulse */
+@keyframes scrollIndicatorLine {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+    opacity: 0.2;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+    opacity: 1;
+  }
+  51% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    opacity: 0.2;
+  }
+}
+
+.animate-scroll-line {
+  animation: scrollIndicatorLine 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* Editorial Preloader animations (immediate first-paint without SSR opacity:0 freeze) */
+@keyframes preloaderFrameExpand {
+  0% {
+    transform: scale(0.94);
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes preloaderTextLift {
+  0% {
+    transform: translate3d(0, 10px, 0);
+    opacity: 0.2;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes preloaderProgressFill {
+  0% {
+    transform: scaleX(0.08);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.animate-preloader-frame {
+  animation: preloaderFrameExpand 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-preloader-text {
+  animation: preloaderTextLift 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-preloader-progress {
+  transform-origin: left;
+  animation: preloaderProgressFill 1.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Fluid editorial underline for navigation and text links */
+.editorial-link {
+  position: relative;
+}
+.editorial-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.editorial-link:hover::after,
+.editorial-link:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
 /* Custom scrollbar for editorial elegance */
 ::-webkit-scrollbar {
   width: 6px;
@@ -51,12 +161,28 @@
   background: #B8AC9B;
 }
 
+/* Hide scrollbar visually while preserving touch/wheel/button horizontal scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .animate-hero-zoom,
+  .animate-scroll-line {
+    animation: none !important;
+    transform: none !important;
   }
 }

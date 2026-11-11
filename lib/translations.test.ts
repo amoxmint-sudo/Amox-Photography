@@ -29,4 +29,30 @@ test('translations dictionary has full parity between sr and en', () => {
     assert.ok(typeof srVal === 'string' && srVal.length > 0, `sr.${key} must be a non-empty string`);
     assert.ok(typeof enVal === 'string' && enVal.length > 0, `en.${key} must be a non-empty string`);
   }
+
+  // Verify updated home page copy in SR and EN
+  assert.equal(
+    translations.sr.hero.subtitle,
+    'Dokumentujemo trenutke koji se ne mogu režirati — kroz fotografiju i film koji čuvaju pokret, karakter i atmosferu stvarnog života.'
+  );
+  assert.equal(
+    translations.sr.intro.title,
+    'Između dokumentarne istine i filmske estetike'
+  );
+  assert.equal(
+    translations.sr.categoriesSection.title,
+    'Šest formata. Jedan autorski pečat.'
+  );
+  assert.equal(
+    translations.sr.aboutPage.photoPlaceholder,
+    'Andrej Ristić · Osnivač i kreativni direktor'
+  );
+  assert.equal(
+    translations.en.aboutPage.photoPlaceholder,
+    'Andrej Ristić · Founder & Creative Director'
+  );
+  assert.equal(
+    translations.sr.aboutPage.quote,
+    '„Kamera je samo alat. Ono što zaista pravi razliku jeste poverenje između čoveka iza objektiva i ljudi ispred njega.“'
+  );
 });

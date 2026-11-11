@@ -1,8 +1,17 @@
 import { SITE_CONFIG } from './site-config';
+import {
+  PortfolioCategoryId,
+  PHOTO_GALLERY_CATEGORIES,
+  PhotoCategoryConfig,
+  isValidPhotoFilename,
+  sortPhotoFilenames,
+  inferAspectRatioFromFilename,
+} from './photo-categories';
+import manifestData from './photos-manifest.json';
 
 export interface PortfolioItem {
   id: string;
-  category: 'weddings' | 'events' | 'portraits' | 'video' | 'ngo';
+  category: PortfolioCategoryId;
   title: {
     sr: string;
     en: string;
@@ -13,6 +22,8 @@ export interface PortfolioItem {
   };
   imagePath: string;
   aspectRatio: 'landscape' | 'portrait' | 'square';
+  width?: number;
+  height?: number;
   alt: {
     sr: string;
     en: string;
@@ -20,25 +31,24 @@ export interface PortfolioItem {
   isPlaceholder?: boolean;
 }
 
-export interface VideoItem {
-  id: string;
-  title: {
-    sr: string;
-    en: string;
-  };
-  description: {
-    sr: string;
-    en: string;
-  };
-  thumbnailPath: string;
-  youtubeId?: string; // Replace with owner's YouTube video ID when ready
-  youtubeUrl: string;
-  isPlaceholder?: boolean;
+export interface PhotoDimensions {
+  width: number;
+  height: number;
 }
+
+export type ServiceInquiryKey =
+  | 'weddings'
+  | 'events'
+  | 'portraits'
+  | 'video-production'
+  | 'video-editing'
+  | 'ngo'
+  | 'corporate'
+  | 'other';
 
 export interface PackageItem {
   id: string;
-  categoryId: 'weddings' | 'events' | 'portraits' | 'video' | 'ngo';
+  serviceKey: ServiceInquiryKey;
   title: {
     sr: string;
     en: string;
@@ -69,175 +79,208 @@ export interface FAQItem {
   };
 }
 
-export interface TestimonialItem {
+export interface PortfolioServiceCategory {
   id: string;
-  clientName: string;
-  projectType: {
-    sr: string;
-    en: string;
-  };
-  quote: {
-    sr: string;
-    en: string;
-  };
-  date?: string;
+  slug: string;
+  title: { sr: string; en: string };
+  shortDesc: { sr: string; en: string };
+  ctaLabel: { sr: string; en: string };
+  coverImage: string;
 }
 
-export const PORTFOLIO_CATEGORIES = [
+/**
+ * Usluge i oblasti rada za prikaz u uvodnom pregledu usluga (BrandIntro)
+ */
+export const PORTFOLIO_CATEGORIES: PortfolioServiceCategory[] = [
   {
     id: 'weddings',
     slug: 'weddings',
     title: { sr: 'Venčanja', en: 'Weddings' },
     shortDesc: {
-      sr: 'Autentični trenuci, iskrene emocije, detalji i pažljivo komponisani kadrovi vašeg posebnog dana.',
-      en: 'Authentic moments, genuine emotions, intimate details, and carefully composed frames of your special day.',
+      sr: 'Celodnevna priča o vama i vašim najbližima — ispričana spontano, sa estetikom modnog editorijala i toplinom porodičnog arhiva.',
+      en: 'A full-day story of you and those closest to you — told spontaneously, blending fashion-editorial aesthetics with the warmth of a family archive.',
     },
-    coverImage: SITE_CONFIG.images.wedding,
+    ctaLabel: {
+      sr: 'Istraži priče sa venčanja',
+      en: 'Explore wedding stories',
+    },
+    coverImage: '/photos/svadbe/AMX03291-Edit.jpg',
   },
   {
     id: 'events',
     slug: 'events',
     title: { sr: 'Rođendani i događaji', en: 'Birthdays & Events' },
     shortDesc: {
-      sr: 'Dokumentovanje privatnih proslava, jubileja i posebnih događaja u toploj i prirodnoj atmosferi.',
-      en: 'Documenting private celebrations, anniversaries, and special events with natural warmth and elegance.',
+      sr: 'Energija velikih jubileja, 18. rođendana i privatnih proslava uhvaćena iz samog centra dešavanja — dinamično, živopisno i bez propuštenih susreta.',
+      en: 'The energy of milestone anniversaries, 18th birthdays, and private celebrations captured from the heart of the action — dynamic, vivid, and without a single missed encounter.',
     },
-    coverImage: SITE_CONFIG.images.event,
+    ctaLabel: {
+      sr: 'Pogledaj galeriju proslava',
+      en: 'View celebration gallery',
+    },
+    coverImage: '/photos/18-rodjendani/AMX09846.jpg',
   },
   {
     id: 'portraits',
     slug: 'portraits',
     title: { sr: 'Portreti', en: 'Portraits' },
     shortDesc: {
-      sr: 'Individualni, editorial i lični portreti uz prirodno svetlo i iskren estetski pristup.',
-      en: 'Individual, editorial, and personal portraits embracing natural lighting and authentic aesthetics.',
+      sr: 'Individualni, poslovni i editorial portreti koji ne liče na obične studijske slike, već otkrivaju karakter, stav i teksturu.',
+      en: 'Individual, executive, and editorial portraits that go beyond standard studio imagery to reveal character, presence, and texture.',
     },
-    coverImage: SITE_CONFIG.images.portrait,
+    ctaLabel: {
+      sr: 'Otkrij portretni portfolio',
+      en: 'Discover portrait portfolio',
+    },
+    coverImage: '/photos/portreti/AMX00230-Edit.jpg',
   },
   {
-    id: 'video',
-    slug: 'video',
-    title: { sr: 'Video produkcija i montaža', en: 'Video Production & Editing' },
-    shortDesc: {
-      sr: 'Filmski kadrovi, ritam montaže i zvučna atmosfera koji pretvaraju događaj u trajnu filmsku priču.',
-      en: 'Cinematic composition, rhythmic editing, and sound design turning moments into enduring films.',
+    id: 'video-production',
+    slug: 'video-production',
+    title: {
+      sr: 'Video produkcija i snimanje',
+      en: 'Video Production & Filming',
     },
-    coverImage: SITE_CONFIG.images.hero,
+    shortDesc: {
+      sr: 'Višekamerno snimanje, pokret, perspektiva iz vazduha i čist zvuk — od autorskih filmova o slavljima do korporativnih i terenskih produkcija.',
+      en: 'Multi-camera filming, fluid movement, aerial perspectives, and crisp audio — from signature celebration films to corporate and field productions.',
+    },
+    ctaLabel: {
+      sr: 'Pogledaj video produkciju',
+      en: 'Explore video production',
+    },
+    coverImage: SITE_CONFIG.images.about,
+  },
+  {
+    id: 'video-editing',
+    slug: 'video-editing',
+    title: {
+      sr: 'Video montaža i postprodukcija',
+      en: 'Video Editing & Post-Production',
+    },
+    shortDesc: {
+      sr: 'Imate snimljen materijal, a treba vam priča koja drži pažnju? Montaža dugih i kratkih formata, filmski color grading, obrada zvuka i titlovanje.',
+      en: 'Have raw footage and need a story that holds attention? Long- and short-form editing, cinematic color grading, sound design, and subtitling.',
+    },
+    ctaLabel: {
+      sr: 'Detalji o postprodukciji',
+      en: 'Post-production details',
+    },
+    coverImage: SITE_CONFIG.images.portrait,
   },
   {
     id: 'ngo',
     slug: 'ngo',
     title: { sr: 'Nevladine organizacije i institucije', en: 'NGO & Organizations' },
     shortDesc: {
-      sr: 'Dokumentovanje konferencija, edukacija, terenskih aktivnosti i društveno odgovornih projekata.',
-      en: 'Documenting conferences, workshops, field operations, and socially impactful institutional projects.',
+      sr: 'Vizuelno pripovedanje sa svrhom — dokumentarni filmovi, fotografisanje konferencija i terenskih akcija koje daju glas važnim društvenim temama.',
+      en: 'Purpose-driven visual storytelling — documentary films, conference coverage, and field reportage that give voice to vital social causes.',
+    },
+    ctaLabel: {
+      sr: 'Pogledaj NVO projekte',
+      en: 'View NGO projects',
     },
     coverImage: SITE_CONFIG.images.ngo,
   },
-] as const;
-
-export const PORTFOLIO_ITEMS: PortfolioItem[] = [
-  {
-    id: 'w-1',
-    category: 'weddings',
-    title: { sr: 'Dokumentarni kadar venčanja', en: 'Documentary Wedding Frame' },
-    subtitle: { sr: 'Iskrena radost i prirodno svetlo', en: 'Candid joy in natural light' },
-    imagePath: SITE_CONFIG.images.wedding,
-    aspectRatio: 'landscape',
-    alt: {
-      sr: 'Mladenci nasmejani u prirodnom ambijentu — primer stila fotografije (placeholder)',
-      en: 'Bride and groom laughing outdoors in natural daylight — style placeholder',
-    },
-    isPlaceholder: true,
-  },
-  {
-    id: 'p-1',
-    category: 'portraits',
-    title: { sr: 'Prirodni svetlosni portret', en: 'Natural Light Portrait' },
-    subtitle: { sr: 'Topli tonovi i autentičan izraz', en: 'Warm tones and authentic expression' },
-    imagePath: SITE_CONFIG.images.portrait,
-    aspectRatio: 'portrait',
-    alt: {
-      sr: 'Portret u enterijeru uz prozor — primer stila fotografije (placeholder)',
-      en: 'Indoor window light portrait — style placeholder',
-    },
-    isPlaceholder: true,
-  },
-  {
-    id: 'e-1',
-    category: 'events',
-    title: { sr: 'Privatna večera i rođendan', en: 'Private Dinner & Birthday' },
-    subtitle: { sr: 'Intimna atmosfera uz sveće', en: 'Intimate candlelit gathering' },
-    imagePath: SITE_CONFIG.images.event,
-    aspectRatio: 'landscape',
-    alt: {
-      sr: 'Društvo za stolom uz rođendansku tortu — primer stila (placeholder)',
-      en: 'Friends around table with celebration cake — style placeholder',
-    },
-    isPlaceholder: true,
-  },
-  {
-    id: 'n-1',
-    category: 'ngo',
-    title: { sr: 'Zajednička radionica i diskusija', en: 'Community Workshop & Panel' },
-    subtitle: { sr: 'Dokumentovanje projektnih aktivnosti', en: 'Documenting collaborative community project' },
-    imagePath: SITE_CONFIG.images.ngo,
-    aspectRatio: 'landscape',
-    alt: {
-      sr: 'Učesnici radionice u razgovoru — primer dokumentarnog pristupa (placeholder)',
-      en: 'Workshop participants engaging in dialogue — style placeholder',
-    },
-    isPlaceholder: true,
-  },
-  {
-    id: 'h-1',
-    category: 'video',
-    title: { sr: 'Filmski pejzažni kadar', en: 'Cinematic Landscape Frame' },
-    subtitle: { sr: 'Široki prostor i kompozicija', en: 'Expansive space and intentional composition' },
-    imagePath: SITE_CONFIG.images.hero,
-    aspectRatio: 'landscape',
-    alt: {
-      sr: 'Pejzaž sa usamljenim drvetom i toplim nebom — primer filmskog kadra (placeholder)',
-      en: 'Landscape with lone tree under warm sky — cinematic frame placeholder',
-    },
-    isPlaceholder: true,
-  },
-  {
-    id: 'a-1',
-    category: 'portraits',
-    title: { sr: 'Editorial portret sa fotoaparatom', en: 'Editorial Portrait with Camera' },
-    subtitle: { sr: 'Tihi trenutak fokusa', en: 'Quiet moment of focus' },
-    imagePath: SITE_CONFIG.images.about,
-    aspectRatio: 'portrait',
-    alt: {
-      sr: 'Portret sa analognom kamerom uz prozor — placeholder za fotografiju vlasnika',
-      en: 'Portrait with camera by window — placeholder for photographer photo',
-    },
-    isPlaceholder: true,
-  },
 ];
 
-export const VIDEO_ITEMS: VideoItem[] = [
-  {
-    id: 'v-1',
+function resolveAspectRatio(
+  filename: string,
+  dims?: PhotoDimensions | null
+): 'landscape' | 'portrait' | 'square' {
+  if (dims && dims.width > 0 && dims.height > 0) {
+    const diffRatio =
+      Math.abs(dims.width - dims.height) / Math.max(dims.width, dims.height);
+    if (diffRatio < 0.05) return 'square';
+    return dims.width > dims.height ? 'landscape' : 'portrait';
+  }
+  return inferAspectRatioFromFilename(filename);
+}
+
+/**
+ * Formira PortfolioItem objekat na osnovu konfiguracije kategorije, imena fajla, rednog broja i izmerenih dimenzija.
+ * Nikada ne izlaže serverske putanje — koristi isključivo bezbednu javnu URL putanju (/photos/<kategorija>/<fajl>).
+ */
+export function buildPortfolioItemFromPhoto(
+  categoryConfig: PhotoCategoryConfig,
+  filename: string,
+  indexInCategory: number,
+  dimensions?: PhotoDimensions | null,
+  customPublicPathPrefix?: string
+): PortfolioItem {
+  const frameNumber = String(indexInCategory + 1).padStart(2, '0');
+  const encodedFilename = encodeURIComponent(filename);
+  const prefix = customPublicPathPrefix || categoryConfig.publicPathPrefix;
+  const publicUrl = `${prefix}/${encodedFilename}`;
+  const aspectRatio = resolveAspectRatio(filename, dimensions);
+  const hasValidDims =
+    dimensions && dimensions.width > 0 && dimensions.height > 0;
+
+  return {
+    id: `${categoryConfig.id}-${frameNumber}-${filename.replace(/[^a-zA-Z0-9_-]/g, '_')}`,
+    category: categoryConfig.id,
     title: {
-      sr: 'AMOX Filmski Showreel — U pripremi',
-      en: 'AMOX Cinematic Showreel — Coming Soon',
+      sr: `${categoryConfig.label.sr} — Kadar ${frameNumber}`,
+      en: `${categoryConfig.label.en} — Frame ${frameNumber}`,
     },
-    description: {
-      sr: 'Kratki pregled kadrova, ritma i zvučnog dizajna. Biće objavljen čim vlasnik dostavi prve zvanične video radove.',
-      en: 'A showcase of pacing, framing, and sound design. Will be updated once official video work is linked.',
+    subtitle: {
+      sr: categoryConfig.subtitle.sr,
+      en: categoryConfig.subtitle.en,
     },
-    thumbnailPath: SITE_CONFIG.images.hero,
-    youtubeUrl: SITE_CONFIG.youtubeUrl,
-    isPlaceholder: true,
-  },
-];
+    imagePath: publicUrl,
+    aspectRatio,
+    ...(hasValidDims
+      ? { width: dimensions.width, height: dimensions.height }
+      : {}),
+    alt: {
+      sr: `${categoryConfig.label.sr} — fotografija ${frameNumber} (AMOX Photography)`,
+      en: `${categoryConfig.label.en} — photograph ${frameNumber} (AMOX Photography)`,
+    },
+  };
+}
+
+/**
+ * Pretvara mapu { [categoryId]: filenames[] } u niz PortfolioItem objekata.
+ */
+export function buildPortfolioItemsFromMap(
+  filesByCategory: Partial<Record<PortfolioCategoryId, string[]>>,
+  dimensionsByKey?: Record<string, PhotoDimensions>,
+  prefixByFileKey?: Record<string, string>
+): { items: PortfolioItem[]; countsByCategory: Record<PortfolioCategoryId, number> } {
+  const items: PortfolioItem[] = [];
+  const countsByCategory = {} as Record<PortfolioCategoryId, number>;
+
+  for (const catConfig of PHOTO_GALLERY_CATEGORIES) {
+    const rawFiles = filesByCategory[catConfig.id] || [];
+    const validFiles = sortPhotoFilenames(rawFiles.filter(isValidPhotoFilename));
+    countsByCategory[catConfig.id] = validFiles.length;
+
+    validFiles.forEach((filename, idx) => {
+      const key = `${catConfig.folderName}/${filename}`;
+      const dims = dimensionsByKey?.[key] || null;
+      const customPrefix = prefixByFileKey?.[key];
+      items.push(
+        buildPortfolioItemFromPhoto(catConfig, filename, idx, dims, customPrefix)
+      );
+    });
+  }
+
+  return { items, countsByCategory };
+}
+
+/**
+ * Inicijalna lista fotografija generisana iz centralizovanih 7 kategorijskih foldera (manifest).
+ * Na klijentu i serveru automatski se dopunjava preko /api/photos ako su dodate nove slike u public/photos/*.
+ */
+export const PORTFOLIO_ITEMS: PortfolioItem[] = buildPortfolioItemsFromMap(
+  (manifestData?.categories || {}) as Partial<Record<PortfolioCategoryId, string[]>>,
+  ((manifestData as { dimensions?: Record<string, PhotoDimensions> })?.dimensions || {})
+).items;
 
 export const PACKAGES_DATA: PackageItem[] = [
   {
     id: 'pkg-weddings',
-    categoryId: 'weddings',
+    serviceKey: 'weddings',
     title: { sr: 'Venčanja', en: 'Weddings' },
     description: {
       sr: 'Kompletno fotografisanje ili video snimanje venčanja prilagođeno vašem tempu i željama.',
@@ -264,7 +307,7 @@ export const PACKAGES_DATA: PackageItem[] = [
   },
   {
     id: 'pkg-events',
-    categoryId: 'events',
+    serviceKey: 'events',
     title: { sr: 'Rođendani i događaji', en: 'Birthdays & Events' },
     description: {
       sr: 'Zabeležite dragocene trenutke sa porodicom i prijateljima bez veštačkog poziranja.',
@@ -291,7 +334,7 @@ export const PACKAGES_DATA: PackageItem[] = [
   },
   {
     id: 'pkg-portraits',
-    categoryId: 'portraits',
+    serviceKey: 'portraits',
     title: { sr: 'Portreti', en: 'Portraits' },
     description: {
       sr: 'Lični, poslovni ili umetnički editorial portreti u studijskom ili prirodnom okruženju.',
@@ -317,35 +360,62 @@ export const PACKAGES_DATA: PackageItem[] = [
     },
   },
   {
-    id: 'pkg-video',
-    categoryId: 'video',
-    title: { sr: 'Video produkcija i montaža', en: 'Video Production & Editing' },
+    id: 'pkg-video-production',
+    serviceKey: 'video-production',
+    title: { sr: 'Video produkcija i snimanje', en: 'Video Production & Filming' },
     description: {
-      sr: 'Kratke filmske forme, video za društvene mreže, muzički i promotivni video zapisi.',
-      en: 'Cinematic short films, social formats, music, and promotional videos.',
+      sr: 'Usluga snimanja i kreiranja video materijala za događaje, proslave, venčanja, poslovne događaje, konferencije, organizacije i druge projekte.',
+      en: 'Video filming and production service for events, celebrations, weddings, corporate events, conferences, organizations, and custom projects.',
     },
     features: {
       sr: [
-        'Snimanje profesionalnom cinema opremom',
-        'Montaža, ritam, dinamika i selekcija muzike',
-        'Kolor korekcija i zvučni dizajn',
-        'Prilagođavanje za YouTube, Instagram i TikTok',
+        'Snimanje događaja, proslava, venčanja i konferencija',
+        'Kreiranje autentičnog video materijala na lokaciji',
+        'Pažljivo kadriranje i rad sa prirodnim i ambijentalnim svetlom',
+        'Prilagođen pristup vrsti događaja i potrebama projekta',
       ],
       en: [
-        'Shooting with professional cinema equipment',
-        'Editing, pacing, rhythm, and licensed audio selection',
-        'Color grading and dedicated sound design',
-        'Optimized exports for YouTube, Instagram, and TikTok',
+        'Filming events, celebrations, weddings, and conferences',
+        'Creating authentic on-location video material',
+        'Intentional framing with natural and ambient lighting',
+        'Approach tailored to the event format and project needs',
       ],
     },
     note: {
-      sr: 'Format i trajanje videa zavise od vaših ciljeva.',
-      en: 'Video format and runtime depend on project goals.',
+      sr: 'Obim snimanja i detalji definišu se prema vrsti projekta.',
+      en: 'Filming scope and details are defined according to your project.',
+    },
+  },
+  {
+    id: 'pkg-video-editing',
+    serviceKey: 'video-editing',
+    title: { sr: 'Video montaža i postprodukcija', en: 'Video Editing & Post-Production' },
+    description: {
+      sr: 'Samostalna usluga montaže materijala koji ste već snimili — povezivanje kadrova, obrada boja, zvuk i prilagođavanje željenim formatima.',
+      en: 'Standalone editing service for footage you have already recorded — frame assembly, color grading, audio alignment, and multi-platform formatting.',
+    },
+    features: {
+      sr: [
+        'Selekcija i smisleno povezivanje snimljenih kadrova',
+        'Obrada boja (kolor korekcija) i usklađivanje zvuka',
+        'Muzička podloga i titlovi prema dogovoru',
+        'Prilagođavanje videa društvenim mrežama i drugim namenama',
+      ],
+      en: [
+        'Selection and rhythmic assembly of recorded footage',
+        'Color grading and audio synchronization',
+        'Music selection and subtitles by arrangement',
+        'Adapting videos for social media and other platforms',
+      ],
+    },
+    note: {
+      sr: 'Ponuda se formira prema obimu materijala i željenom formatu.',
+      en: 'Proposal tailored to your source footage and target format.',
     },
   },
   {
     id: 'pkg-ngo',
-    categoryId: 'ngo',
+    serviceKey: 'ngo',
     title: { sr: 'Nevladine organizacije i institucije', en: 'NGO & Organizations' },
     description: {
       sr: 'Profesionalno dokumentovanje aktivnosti organizacija civilnog društva i institucija.',
@@ -439,9 +509,4 @@ export const FAQ_DATA: FAQItem[] = [
       en: 'Before every engagement, we review your timeline, style preferences, and key priorities. We focus on a relaxed, natural environment where you feel at ease, ensuring authentic and meaningful frames.',
     },
   },
-];
-
-// As instructed: hide fake reviews; keep clean data structure ready for real reviews
-export const TESTIMONIALS_DATA: TestimonialItem[] = [
-  // Popunjava se isključivo stvarnim izjavama klijenata kada ih vlasnik dostavi.
 ];

@@ -1,10 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
+import Script from 'next/script';
+import { motion, AnimatePresence } from 'motion/react';
 import { Language, SITE_CONFIG } from '@/lib/site-config';
 import { translations } from '@/lib/translations';
 import {
   ContactFormData,
+  CONTACT_SERVICE_OPTIONS,
+  getLocalizedServiceLabel,
   validateContactForm,
   buildMailtoUrl,
   formatPlainTextInquiry,
@@ -22,37 +26,57 @@ import {
   AlertCircle,
   HelpCircle,
 } from 'lucide-react';
+import { EditorialReveal } from './EditorialReveal';
+
+const CONTACT_SENJA_WIDGET_ID = 'bd9a5992-aaf9-443a-88cc-3f00ea32e8bc';
 
 interface ContactSectionProps {
   lang: Language;
   preselectedService?: string;
+  preselectionVersion?: number;
 }
 
-export function ContactSection({ lang, preselectedService }: ContactSectionProps) {
+export function ContactSection({
+  lang,
+  preselectedService,
+  preselectionVersion = 0,
+}: ContactSectionProps) {
   const t = translations[lang];
 
   const [formData, setFormData] = useState<ContactFormData>({
     fullName: '',
     email: '',
     phone: '',
-    serviceType: preselectedService || '',
+    serviceType: '',
     eventDate: '',
     location: '',
     message: '',
   });
 
+  // Tracks which preselectionVersion the user manually overrode
+  const [manualOverrideVersion, setManualOverrideVersion] = useState<number>(-1);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [copied, setCopied] = useState(false);
-  const [submittedAttempt, setSubmittedAttempt] = useState(false);
 
-  // Derived effective service type
-  const effectiveServiceType = formData.serviceType || preselectedService || '';
+  // If user clicked a package/service CTA more recently than their last manual dropdown change,
+  // use the preselected service; otherwise use their manual selection.
+  const rawActiveService =
+    manualOverrideVersion === preselectionVersion
+      ? formData.serviceType
+      : preselectedService || formData.serviceType || '';
+
+  const effectiveServiceType = rawActiveService
+    ? getLocalizedServiceLabel(rawActiveService, lang)
+    : '';
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'serviceType') {
+      setManualOverrideVersion(preselectionVersion);
+    }
     if (errors[name as keyof ValidationErrors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -60,7 +84,6 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmittedAttempt(true);
 
     const submissionData = {
       ...formData,
@@ -75,12 +98,17 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
 
     setErrors({});
     const mailtoUrl = buildMailtoUrl(submissionData, lang);
-    // Open user's email client
     window.location.href = mailtoUrl;
   };
 
   const handleCopy = async () => {
-    const text = formatPlainTextInquiry(formData, lang);
+    const text = formatPlainTextInquiry(
+      {
+        ...formData,
+        serviceType: effectiveServiceType,
+      },
+      lang
+    );
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -90,34 +118,45 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
     }
   };
 
-  const serviceOptions = [
-    { value: 'Venčanja / Weddings', label: lang === 'sr' ? 'Venčanja' : 'Weddings' },
-    { value: 'Rođendani i događaji / Events', label: lang === 'sr' ? 'Rođendani i događaji' : 'Birthdays & Events' },
-    { value: 'Portreti / Portraits', label: lang === 'sr' ? 'Portreti' : 'Portraits' },
-    { value: 'Video produkcija i montaža / Video', label: lang === 'sr' ? 'Video produkcija i montaža' : 'Video Production & Editing' },
-    { value: 'Nevladine organizacije / NGO', label: lang === 'sr' ? 'Nevladine organizacije i institucije' : 'NGO & Organizations' },
-    { value: 'Ostalo / Other', label: lang === 'sr' ? 'Drugo / Više usluga' : 'Other / Multiple Services' },
-  ];
+  const serviceOptions = CONTACT_SERVICE_OPTIONS.map((opt) => ({
+    key: opt.key,
+    value: opt.label[lang],
+    label: opt.label[lang],
+  }));
 
   return (
     <section id="contact" className="py-20 lg:py-28 bg-[#FAF8F5] border-t border-[#EAE3D9]">
+      <Script
+        id={`senja-platform-${CONTACT_SENJA_WIDGET_ID}`}
+        src={`https://widget.senja.io/widget/${CONTACT_SENJA_WIDGET_ID}/platform.js`}
+        strategy="afterInteractive"
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-2xl mx-auto text-center mb-16">
-          <span className="text-xs uppercase tracking-[0.25em] font-mono text-[#8C5835] block mb-3">
-            {lang === 'sr' ? 'Rezervacija i upiti' : 'Booking & Inquiries'}
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#211B17] tracking-tight">
-            {t.contactPage.title}
-          </h2>
-          <p className="mt-4 text-sm sm:text-base text-[#6E645A] leading-relaxed">
-            {t.contactPage.subtitle}
-          </p>
+          <EditorialReveal variant="heading">
+            <span className="text-xs uppercase tracking-[0.25em] font-mono text-[#8C5835] block mb-3">
+              {lang === 'sr' ? 'Rezervacija i upiti' : 'Booking & Inquiries'}
+            </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#211B17] tracking-tight">
+              {t.contactPage.title}
+            </h2>
+          </EditorialReveal>
+          <EditorialReveal variant="text" delay={0.08}>
+            <p className="mt-4 text-sm sm:text-base text-[#6E645A] leading-relaxed">
+              {t.contactPage.subtitle}
+            </p>
+          </EditorialReveal>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start lg:items-stretch">
           {/* Left Column: Contact Form */}
-          <div className="lg:col-span-7 bg-white p-6 sm:p-10 border border-[#EAE3D9] shadow-sm">
+          <EditorialReveal
+            variant="section"
+            delay={0.08}
+            className="lg:col-span-7 bg-white p-6 sm:p-10 border border-[#EAE3D9] shadow-sm flex flex-col justify-between"
+          >
             <form onSubmit={handleSubmit} noValidate className="space-y-6">
               {/* Full Name */}
               <div>
@@ -143,15 +182,25 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   className={`w-full px-4 py-3 text-sm bg-[#FAF8F5] border rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 ${
                     errors.fullName
                       ? 'border-red-500 focus:ring-red-500'
-                      : 'border-[#E0D7CB] focus:ring-[#8C5835] focus:border-[#8C5835]'
-                  } transition-colors`}
+                      : 'border-[#E0D7CB] hover:border-[#C5B8A8] focus:ring-[#8C5835] focus:border-[#8C5835]'
+                  } transition-all duration-200`}
                 />
-                {errors.fullName && (
-                  <p id="fullName-error" className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{errors.fullName}</span>
-                  </p>
-                )}
+                <AnimatePresence>
+                  {errors.fullName && (
+                    <motion.p
+                      key="fullName-err"
+                      id="fullName-error"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.2 }}
+                      className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{errors.fullName}</span>
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Email Address */}
@@ -178,15 +227,25 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   className={`w-full px-4 py-3 text-sm bg-[#FAF8F5] border rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 ${
                     errors.email
                       ? 'border-red-500 focus:ring-red-500'
-                      : 'border-[#E0D7CB] focus:ring-[#8C5835] focus:border-[#8C5835]'
-                  } transition-colors`}
+                      : 'border-[#E0D7CB] hover:border-[#C5B8A8] focus:ring-[#8C5835] focus:border-[#8C5835]'
+                  } transition-all duration-200`}
                 />
-                {errors.email && (
-                  <p id="email-error" className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{errors.email}</span>
-                  </p>
-                )}
+                <AnimatePresence>
+                  {errors.email && (
+                    <motion.p
+                      key="email-err"
+                      id="email-error"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.2 }}
+                      className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{errors.email}</span>
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Phone & Service Grid */}
@@ -209,7 +268,7 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder={t.contactPage.phonePlaceholder}
-                    className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-colors"
+                    className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
                   />
                 </div>
 
@@ -235,24 +294,34 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                     className={`w-full px-4 py-3 text-sm bg-[#FAF8F5] border rounded-none text-[#211B17] focus:bg-white focus:outline-none focus:ring-1 ${
                       errors.serviceType
                         ? 'border-red-500 focus:ring-red-500'
-                        : 'border-[#E0D7CB] focus:ring-[#8C5835] focus:border-[#8C5835]'
-                    } transition-colors`}
+                        : 'border-[#E0D7CB] hover:border-[#C5B8A8] focus:ring-[#8C5835] focus:border-[#8C5835]'
+                    } transition-all duration-200`}
                   >
                     <option value="" disabled>
                       {t.contactPage.serviceSelectPlaceholder}
                     </option>
                     {serviceOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
+                      <option key={opt.key} value={opt.value}>
                         {opt.label}
                       </option>
                     ))}
                   </select>
-                  {errors.serviceType && (
-                    <p id="serviceType-error" className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{errors.serviceType}</span>
-                    </p>
-                  )}
+                  <AnimatePresence>
+                    {errors.serviceType && (
+                      <motion.p
+                        key="service-err"
+                        id="serviceType-error"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.2 }}
+                        className="mt-1.5 text-xs text-red-600 flex items-center gap-1.5"
+                      >
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{errors.serviceType}</span>
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
@@ -275,7 +344,7 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                     value={formData.eventDate}
                     onChange={handleChange}
                     placeholder={t.contactPage.datePlaceholder}
-                    className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-colors"
+                    className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
                   />
                 </div>
 
@@ -296,7 +365,7 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                     value={formData.location}
                     onChange={handleChange}
                     placeholder={t.contactPage.locationPlaceholder}
-                    className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-colors"
+                    className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
                   />
                 </div>
               </div>
@@ -319,7 +388,7 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   value={formData.message}
                   onChange={handleChange}
                   placeholder={t.contactPage.messagePlaceholder}
-                  className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-colors"
+                  className="w-full px-4 py-3 text-sm bg-[#FAF8F5] border border-[#E0D7CB] hover:border-[#C5B8A8] rounded-none text-[#211B17] placeholder-[#A09488] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#8C5835] focus:border-[#8C5835] transition-all duration-200"
                 />
               </div>
 
@@ -327,9 +396,9 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
               <div>
                 <button
                   type="submit"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 text-xs font-medium uppercase tracking-[0.2em] text-white bg-[#211B17] hover:bg-[#8C5835] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8C5835]"
+                  className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-3.5 text-xs font-medium uppercase tracking-[0.2em] text-white bg-[#211B17] hover:bg-[#8C5835] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8C5835]"
                 >
-                  <Send className="w-4 h-4" />
+                  <Send className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   <span>{t.contactPage.submitButton}</span>
                 </button>
               </div>
@@ -341,7 +410,7 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   <span>{t.contactPage.notice}</span>
                 </p>
 
-                {/* Instant Copy Fallback */}
+                {/* Instant Copy Fallback with animated state feedback */}
                 <div className="mt-4 p-3 bg-[#FAF8F5] border border-[#E0D7CB] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                   <span className="text-[#6E645A]">
                     {t.contactPage.fallbackHelp}
@@ -349,31 +418,53 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="shrink-0 inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-[#D5CCC0] hover:border-[#8C5835] text-[#211B17] rounded-none transition-colors"
+                    className={`shrink-0 inline-flex items-center gap-2 px-3.5 py-2 bg-white border rounded-none transition-all duration-200 active:scale-[0.98] ${
+                      copied
+                        ? 'border-emerald-600 bg-emerald-50/40'
+                        : 'border-[#D5CCC0] hover:border-[#8C5835] text-[#211B17]'
+                    }`}
                   >
-                    {copied ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                        <span className="text-emerald-700 font-medium">
-                          {t.contactPage.copiedText}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5 text-[#8C5835]" />
-                        <span>{t.contactPage.copyButton}</span>
-                      </>
-                    )}
+                    <AnimatePresence mode="wait" initial={false}>
+                      {copied ? (
+                        <motion.span
+                          key="copied-state"
+                          initial={{ opacity: 0, scale: 0.92 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.92 }}
+                          transition={{ duration: 0.16 }}
+                          className="inline-flex items-center gap-1.5 text-emerald-700 font-medium"
+                        >
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{t.contactPage.copiedText}</span>
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="copy-state"
+                          initial={{ opacity: 0, scale: 0.92 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.92 }}
+                          transition={{ duration: 0.16 }}
+                          className="inline-flex items-center gap-1.5"
+                        >
+                          <Copy className="w-3.5 h-3.5 text-[#8C5835]" />
+                          <span>{t.contactPage.copyButton}</span>
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
                   </button>
                 </div>
               </div>
             </form>
-          </div>
+          </EditorialReveal>
 
-          {/* Right Column: Direct Info, Social & Pic-Time */}
-          <div className="lg:col-span-5 space-y-8">
+          {/* Right Column: Direct Info, Social, Pic-Time & Senja */}
+          <div className="lg:col-span-5 flex flex-col justify-between gap-8 lg:gap-6">
             {/* Direct details */}
-            <div className="bg-white p-6 sm:p-8 border border-[#EAE3D9]">
+            <EditorialReveal
+              variant="card"
+              delay={0.14}
+              className="bg-white p-6 sm:p-8 border border-[#EAE3D9] hover:border-[#D5CCC0] transition-colors duration-300"
+            >
               <h3 className="text-xs uppercase tracking-[0.22em] font-mono text-[#8C5835] mb-6">
                 {t.contactPage.directContactTitle}
               </h3>
@@ -385,7 +476,7 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   </span>
                   <a
                     href={`mailto:${SITE_CONFIG.email}`}
-                    className="font-medium text-[#211B17] hover:text-[#8C5835] transition-colors flex items-center gap-2"
+                    className="font-medium text-[#211B17] hover:text-[#8C5835] hover:translate-x-1 transition-all duration-200 inline-flex items-center gap-2"
                   >
                     <Mail className="w-4 h-4 text-[#8C5835]" />
                     <span>{SITE_CONFIG.email}</span>
@@ -400,7 +491,7 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                     href={SITE_CONFIG.whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-medium text-[#211B17] hover:text-[#8C5835] transition-colors flex items-center gap-2"
+                    className="font-medium text-[#211B17] hover:text-[#8C5835] hover:translate-x-1 transition-all duration-200 inline-flex items-center gap-2"
                   >
                     <Phone className="w-4 h-4 text-emerald-600" />
                     <span>{SITE_CONFIG.phone}</span>
@@ -416,10 +507,14 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   </p>
                 </div>
               </div>
-            </div>
+            </EditorialReveal>
 
             {/* Pic-Time client portal highlight */}
-            <div className="bg-[#FAF8F5] p-6 sm:p-8 border border-[#E0D7CB]">
+            <EditorialReveal
+              variant="card"
+              delay={0.22}
+              className="bg-[#FAF8F5] p-6 sm:p-8 border border-[#E0D7CB] hover:border-[#8C5835]/60 transition-colors duration-300"
+            >
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-xs uppercase tracking-[0.22em] font-mono text-[#8C5835]">
                   {t.contactPage.clientGalleryTitle}
@@ -437,14 +532,18 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                 href={SITE_CONFIG.picTimeClientUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#211B17] hover:text-[#8C5835] underline underline-offset-4 decoration-[#8C5835] transition-colors"
+                className="editorial-link inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#211B17] hover:text-[#8C5835] pb-0.5 transition-colors"
               >
                 <span>{lang === 'sr' ? 'Otvori klijentsku galeriju' : 'Open Client Gallery'}</span>
               </a>
-            </div>
+            </EditorialReveal>
 
             {/* Social channels */}
-            <div className="bg-white p-6 sm:p-8 border border-[#EAE3D9]">
+            <EditorialReveal
+              variant="card"
+              delay={0.3}
+              className="bg-white p-6 sm:p-8 border border-[#EAE3D9] hover:border-[#D5CCC0] transition-colors duration-300"
+            >
               <span className="text-xs uppercase tracking-[0.22em] font-mono text-[#8C5835] block mb-4">
                 {t.footer.social}
               </span>
@@ -454,7 +553,7 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   href={SITE_CONFIG.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-[#211B17] hover:text-[#8C5835] transition-colors"
+                  className="inline-flex items-center gap-3 text-[#211B17] hover:text-[#8C5835] hover:translate-x-1 transition-all duration-200"
                 >
                   <Instagram className="w-4 h-4 text-[#8C5835]" />
                   <span>@amox.photography</span>
@@ -463,7 +562,7 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   href={SITE_CONFIG.youtubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-[#211B17] hover:text-[#8C5835] transition-colors"
+                  className="inline-flex items-center gap-3 text-[#211B17] hover:text-[#8C5835] hover:translate-x-1 transition-all duration-200"
                 >
                   <Youtube className="w-4 h-4 text-[#8C5835]" />
                   <span>@amoxphotography (YouTube)</span>
@@ -472,7 +571,7 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   href={SITE_CONFIG.tiktokUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-[#211B17] hover:text-[#8C5835] transition-colors"
+                  className="inline-flex items-center gap-3 text-[#211B17] hover:text-[#8C5835] hover:translate-x-1 transition-all duration-200"
                 >
                   <span className="w-4 h-4 flex items-center justify-center font-mono text-[10px] font-bold border border-[#8C5835] text-[#8C5835] rounded">
                     TT
@@ -480,7 +579,21 @@ export function ContactSection({ lang, preselectedService }: ContactSectionProps
                   <span>@amox.ph (TikTok)</span>
                 </a>
               </div>
-            </div>
+            </EditorialReveal>
+
+            {/* Senja client review panel */}
+            <EditorialReveal
+              variant="card"
+              delay={0.36}
+              className="bg-white p-6 sm:p-8 border border-[#EAE3D9] hover:border-[#D5CCC0] transition-colors duration-300 lg:flex-1 flex flex-col justify-center overflow-hidden"
+            >
+              <div
+                className="senja-embed block w-full max-w-full"
+                data-id={CONTACT_SENJA_WIDGET_ID}
+                data-mode="shadow"
+                data-lazyload="false"
+              />
+            </EditorialReveal>
           </div>
         </div>
       </div>

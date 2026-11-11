@@ -1,0 +1,182 @@
+{
+  "generatedAt": "2026-11-05T10:19:47.064Z",
+  "categories": {
+    "svadbe": [
+      "AMX03165-Edit.jpg",
+      "AMX03254.jpg",
+      "AMX03291-Edit.jpg",
+      "AMX03293-Edit-1.jpg",
+      "AMX03300-Edit-1.jpg",
+      "AMX03333-Edit.jpg",
+      "AMX03363-Edit.jpg",
+      "AMX03367-Edit.jpg",
+      "AMX03376-Edit.jpg",
+      "AMX03398-Edit.jpg",
+      "AMX03410-Edit.jpg"
+    ],
+    "18-rodjendani": [
+      "AMX01858.jpg",
+      "AMX01869.jpg",
+      "AMX01879.jpg",
+      "AMX01896.jpg",
+      "AMX01909.jpg",
+      "AMX09846.jpg",
+      "AMX09847.jpg",
+      "AMX09850.jpg",
+      "AMX09862.jpg"
+    ],
+    "1-rodjendani": [],
+    "krstenja": [],
+    "portreti": [
+      "AMX00230-Edit.jpg",
+      "AMX00255-Edit.jpg",
+      "AMX00288-Edit.jpg",
+      "AMX00394-Edit.jpg",
+      "AMX00425-Edit.jpg",
+      "AMX04038-2.jpg",
+      "AMX04047.jpg",
+      "AMX04056.jpg",
+      "AMX04484.jpg",
+      "AMX04492.jpg",
+      "AMX04554.jpg",
+      "AMX04625.jpg",
+      "AMX04631.jpg"
+    ],
+    "ngo-organizacije": [],
+    "korporativni-dogadjaji": []
+  },
+  "dimensions": {
+    "svadbe/AMX03165-Edit.jpg": {
+      "height": 4128,
+      "width": 6192
+    },
+    "svadbe/AMX03254.jpg": {
+      "height": 4128,
+      "width": 6192
+    },
+    "svadbe/AMX03291-Edit.jpg": {
+      "height": 2749,
+      "width": 1833
+    },
+    "svadbe/AMX03293-Edit-1.jpg": {
+      "height": 3584,
+      "width": 2389
+    },
+    "svadbe/AMX03300-Edit-1.jpg": {
+      "height": 5224,
+      "width": 3483
+    },
+    "svadbe/AMX03333-Edit.jpg": {
+      "height": 5566,
+      "width": 3711
+    },
+    "svadbe/AMX03363-Edit.jpg": {
+      "height": 1555,
+      "width": 1037
+    },
+    "svadbe/AMX03367-Edit.jpg": {
+      "height": 5490,
+      "width": 3660
+    },
+    "svadbe/AMX03376-Edit.jpg": {
+      "height": 4673,
+      "width": 3115
+    },
+    "svadbe/AMX03398-Edit.jpg": {
+      "height": 6192,
+      "width": 4128
+    },
+    "svadbe/AMX03410-Edit.jpg": {
+      "height": 6192,
+      "width": 4128
+    },
+    "18-rodjendani/AMX01858.jpg": {
+      "height": 4128,
+      "width": 6192
+    },
+    "18-rodjendani/AMX01869.jpg": {
+      "height": 6192,
+      "width": 4128
+    },
+    "18-rodjendani/AMX01879.jpg": {
+      "height": 4128,
+      "width": 6192
+    },
+    "18-rodjendani/AMX01896.jpg": {
+      "height": 4128,
+      "width": 6192
+    },
+    "18-rodjendani/AMX01909.jpg": {
+      "height": 6192,
+      "width": 4128
+    },
+    "18-rodjendani/AMX09846.jpg": {
+      "height": 6192,
+      "width": 4128
+    },
+    "18-rodjendani/AMX09847.jpg": {
+      "height": 4128,
+      "width": 6192
+    },
+    "18-rodjendani/AMX09850.jpg": {
+      "height": 4128,
+      "width": 6192
+    },
+    "18-rodjendani/AMX09862.jpg": {
+      "height": 4128,
+      "width": 6192
+    },
+    "portreti/AMX00230-Edit.jpg": {
+      "height": 6192,
+      "width": 4128
+    },
+    "portreti/AMX00255-Edit.jpg": {
+      "height": 6192,
+      "width": 4128
+    },
+    "portreti/AMX00288-Edit.jpg": {
+      "height": 5908,
+      "width": 3939
+    },
+    "portreti/AMX00394-Edit.jpg": {
+      "height": 6192,
+      "width": 4128
+    },
+    "portreti/AMX00425-Edit.jpg": {
+      "height": 6192,
+      "width": 4128
+    },
+    "portreti/AMX04038-2.jpg": {
+      "height": 4658,
+      "width": 3723
+    },
+    "portreti/AMX04047.jpg": {
+      "height": 5165,
+      "width": 4128
+    },
+    "portreti/AMX04056.jpg": {
+      "height": 4128,
+      "width": 6192
+    },
+    "portreti/AMX04484.jpg": {
+      "height": 5021,
+      "width": 4013
+    },
+    "portreti/AMX04492.jpg": {
+      "height": 4045,
+      "width": 3233
+    },
+    "portreti/AMX04554.jpg": {
+      "height": 4865,
+      "width": 3888
+    },
+    "portreti/AMX04625.jpg": {
+      "height": 4523,
+      "width": 3615
+    },
+    "portreti/AMX04631.jpg": {
+      "height": 5165,
+      "width": 4128
+    }
+  }
+}

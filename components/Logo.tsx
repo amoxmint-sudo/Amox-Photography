@@ -2,9 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { SITE_CONFIG } from '@/lib/site-config';
+import { SITE_CONFIG, Language } from '@/lib/site-config';
 
 interface LogoProps {
+  lang?: Language;
   className?: string;
   isLight?: boolean;
   onClick?: () => void;
@@ -16,17 +17,24 @@ interface LogoProps {
  * Can be easily swapped with a graphic SVG/PNG logo in the future if provided by the owner.
  */
 export function Logo({
+  lang = 'sr',
   className = '',
   isLight = false,
   onClick,
   showSubtitle = true,
 }: LogoProps) {
+  const homeHref = lang === 'en' ? '/?lang=en' : '/';
+  const ariaLabel =
+    lang === 'en'
+      ? `${SITE_CONFIG.name} — Home`
+      : `${SITE_CONFIG.name} — Početna`;
+
   return (
     <Link
-      href="/"
+      href={homeHref}
       onClick={onClick}
       className={`group inline-flex flex-col tracking-tight focus:outline-none focus-visible:ring-1 focus-visible:ring-[#8C5835] ${className}`}
-      aria-label={`${SITE_CONFIG.name} — Početna`}
+      aria-label={ariaLabel}
     >
       <span
         className={`font-sans text-sm sm:text-base font-semibold tracking-[0.28em] uppercase transition-colors ${

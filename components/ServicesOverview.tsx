@@ -4,20 +4,57 @@ import React from 'react';
 import Image from 'next/image';
 import { Language, SITE_CONFIG } from '@/lib/site-config';
 import { translations } from '@/lib/translations';
-import { ArrowRight, CheckCircle2, Video, Camera, Sparkles, Building2, Users } from 'lucide-react';
+import type { PagePhotoSelection } from '@/lib/photo-selection';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Video,
+  Camera,
+  Sparkles,
+  Building2,
+  Users,
+} from 'lucide-react';
+import { EditorialReveal } from './EditorialReveal';
 
 interface ServicesOverviewProps {
   lang: Language;
   onSelectServiceForInquiry: (serviceName: string) => void;
   onOpenPhoto: (imagePath: string, title: string, category: string) => void;
+  selectedPhotos?: PagePhotoSelection['servicesBySlug'];
 }
 
 export function ServicesOverview({
   lang,
   onSelectServiceForInquiry,
   onOpenPhoto,
+  selectedPhotos,
 }: ServicesOverviewProps) {
   const t = translations[lang];
+  const weddingPrimary = selectedPhotos?.weddings.primary;
+  const weddingMainSrc = weddingPrimary?.imagePath || '/photos/svadbe/AMX03291-Edit.jpg';
+  const weddingMainTitle =
+    weddingPrimary?.title[lang] ||
+    (lang === 'sr' ? 'Venčanja — Kadar 01' : 'Weddings — Frame 01');
+
+  const eventPrimary = selectedPhotos?.events.primary;
+  const eventMainSrc = eventPrimary?.imagePath || '/photos/18-rodjendani/AMX09846.jpg';
+  const eventMainTitle =
+    eventPrimary?.title[lang] ||
+    (lang === 'sr' ? '18. rođendani — Kadar 01' : '18th Birthdays — Frame 01');
+
+  const portraitPrimary = selectedPhotos?.portraits.primary;
+  const portraitMainSrc = portraitPrimary?.imagePath || '/photos/portreti/AMX00288-Edit.jpg';
+  const portraitMainTitle =
+    portraitPrimary?.title[lang] ||
+    (lang === 'sr' ? 'Portreti — Kadar 01' : 'Portraits — Frame 01');
+
+  const ngoPrimary = selectedPhotos?.ngo.primary;
+  const ngoMainSrc = ngoPrimary?.imagePath || SITE_CONFIG.images.ngo;
+  const ngoMainTitle =
+    ngoPrimary?.title[lang] ||
+    (lang === 'sr'
+      ? 'Dokumentovanje organizacija — Primer kadra'
+      : 'Institutional Documentation — Frame example');
 
   return (
     <div className="space-y-0">
@@ -29,22 +66,24 @@ export function ServicesOverview({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-6 space-y-6">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-[#8C5835]">
-                <Camera className="w-4 h-4" />
-                <span>01 · {lang === 'sr' ? 'Fotografija i Film' : 'Photography & Film'}</span>
-              </div>
+              <EditorialReveal variant="heading">
+                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-[#8C5835] mb-4">
+                  <Camera className="w-4 h-4" />
+                  <span>01 · {lang === 'sr' ? 'Fotografija i Film' : 'Photography & Film'}</span>
+                </div>
 
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#211B17] tracking-tight">
-                {lang === 'sr' ? 'Venčanja' : 'Weddings'}
-              </h2>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#211B17] tracking-tight">
+                  {lang === 'sr' ? 'Venčanja' : 'Weddings'}
+                </h2>
+              </EditorialReveal>
 
-              <p className="text-sm sm:text-base text-[#6E645A] leading-relaxed">
-                {lang === 'sr'
-                  ? 'Venčanje je priča o iskrenim pogledima, nežnim dodirima i trenucima koji prolaze u treptaju oka. Naš pristup fotografisanju venčanja stavlja naglasak na autentične trenutke, prirodno svetlo i nenametljivu prisutnost, bez fabrikovanih poza.'
-                  : 'A wedding is a tapestry of quiet glances, sincere joy, and moments that pass in a breath. Our wedding approach focuses on authentic documentary capture, warm natural light, and discreet presence without forced posing.'}
-              </p>
+              <EditorialReveal variant="text" delay={0.08}>
+                <p className="text-sm sm:text-base text-[#6E645A] leading-relaxed">
+                  {t.servicesOverview.weddingsIntro}
+                </p>
+              </EditorialReveal>
 
-              <div className="pt-2">
+              <EditorialReveal variant="fade-up" delay={0.16} className="pt-2">
                 <button
                   type="button"
                   onClick={() =>
@@ -52,41 +91,60 @@ export function ServicesOverview({
                       lang === 'sr' ? 'Venčanja' : 'Weddings'
                     )
                   }
-                  className="inline-flex items-center gap-2 px-6 py-3 text-xs uppercase tracking-[0.2em] font-medium text-white bg-[#211B17] hover:bg-[#8C5835] transition-colors"
+                  className="group inline-flex items-center gap-2.5 px-6 py-3.5 text-xs uppercase tracking-[0.2em] font-medium text-white bg-[#211B17] hover:bg-[#8C5835] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C5835]"
                 >
                   <span>
                     {lang === 'sr' ? 'Zatraži ponudu za venčanje' : 'Request Wedding Quote'}
                   </span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1.5" />
                 </button>
-              </div>
+              </EditorialReveal>
             </div>
 
-            <div className="lg:col-span-6">
+            <EditorialReveal
+              variant="image-reveal"
+              delay={0.12}
+              parallaxOffset={-8}
+              className="lg:col-span-6"
+            >
               <div
+                data-service-photo="weddings-primary"
+                data-selected-photo={weddingMainSrc}
                 onClick={() =>
                   onOpenPhoto(
-                    SITE_CONFIG.images.wedding,
-                    lang === 'sr' ? 'Venčanja — Primer kadra' : 'Weddings — Frame example',
-                    'weddings'
+                    weddingMainSrc,
+                    weddingMainTitle,
+                    'svadbe'
                   )
                 }
-                className="group relative aspect-[4/3] w-full overflow-hidden bg-[#E0D7CB] cursor-pointer shadow-sm"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onOpenPhoto(
+                      weddingMainSrc,
+                      weddingMainTitle,
+                      'svadbe'
+                    );
+                  }
+                }}
+                className="group relative aspect-[2/3] lg:aspect-[4/5] w-full max-w-md mx-auto overflow-hidden bg-[#E0D7CB] cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C5835]"
               >
                 <Image
-                  src={SITE_CONFIG.images.wedding}
-                  alt={lang === 'sr' ? 'Primer kadra sa venčanja' : 'Wedding frame example'}
+                  src={weddingMainSrc}
+                  alt={weddingPrimary?.alt[lang] || (lang === 'sr' ? 'Kadar sa venčanja' : 'Wedding frame')}
                   fill
-                  sizes="(max-width: 1024px) 100vw, 600px"
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 1024px) 100vw, 480px"
+                  className="object-cover object-top group-hover:scale-[1.055] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                <div className="absolute bottom-3 left-3 bg-[#1B1613]/80 backdrop-blur-sm px-3 py-1 text-[10px] text-stone-200 font-mono tracking-widest uppercase">
-                  {lang === 'sr' ? 'Klikni za uvećanje' : 'Click to enlarge'}
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/5 transition-colors duration-300" />
+                <div className="absolute bottom-3 left-3 bg-[#1B1613]/85 backdrop-blur-sm px-3 py-1.5 text-[10px] text-stone-200 font-mono tracking-widest uppercase transition-transform duration-300 group-hover:translate-x-1">
+                  {lang === 'sr' ? 'Klikni za galeriju' : 'Click for gallery'}
                 </div>
               </div>
-            </div>
+            </EditorialReveal>
           </div>
         </div>
       </section>
@@ -98,49 +156,25 @@ export function ServicesOverview({
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-6 order-2 lg:order-1">
-              <div
-                onClick={() =>
-                  onOpenPhoto(
-                    SITE_CONFIG.images.event,
-                    lang === 'sr' ? 'Događaji — Primer kadra' : 'Events — Frame example',
-                    'events'
-                  )
-                }
-                className="group relative aspect-[4/3] w-full overflow-hidden bg-[#E0D7CB] cursor-pointer shadow-sm"
-              >
-                <Image
-                  src={SITE_CONFIG.images.event}
-                  alt={lang === 'sr' ? 'Primer kadra sa proslave' : 'Celebration frame example'}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 600px"
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                <div className="absolute bottom-3 left-3 bg-[#1B1613]/80 backdrop-blur-sm px-3 py-1 text-[10px] text-stone-200 font-mono tracking-widest uppercase">
-                  {lang === 'sr' ? 'Klikni za uvećanje' : 'Click to enlarge'}
+            <div className="lg:col-span-6 space-y-6">
+              <EditorialReveal variant="heading">
+                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-[#8C5835] mb-4">
+                  <Users className="w-4 h-4" />
+                  <span>02 · {lang === 'sr' ? 'Proslave i Jubileji' : 'Celebrations & Gatherings'}</span>
                 </div>
-              </div>
-            </div>
 
-            <div className="lg:col-span-6 order-1 lg:order-2 space-y-6">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-[#8C5835]">
-                <Users className="w-4 h-4" />
-                <span>02 · {lang === 'sr' ? 'Proslave i Jubileji' : 'Celebrations & Gatherings'}</span>
-              </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#211B17] tracking-tight">
+                  {lang === 'sr' ? 'Rođendani i događaji' : 'Birthdays & Events'}
+                </h2>
+              </EditorialReveal>
 
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#211B17] tracking-tight">
-                {lang === 'sr' ? 'Rođendani i događaji' : 'Birthdays & Events'}
-              </h2>
+              <EditorialReveal variant="text" delay={0.08}>
+                <p className="text-sm sm:text-base text-[#6E645A] leading-relaxed">
+                  {t.servicesOverview.eventsIntro}
+                </p>
+              </EditorialReveal>
 
-              <p className="text-sm sm:text-base text-[#6E645A] leading-relaxed">
-                {lang === 'sr'
-                  ? 'Privatne proslave, jubileji i rođendani nose posebnu toplinu. Beležimo atmosferu, osmehe vaših gostiju, dekoraciju i spontane trenutke radosti koji čine događaj nezaboravnim.'
-                  : 'Private celebrations, birthdays, and milestones carry warmth and connection. We capture the atmosphere, genuine smiles, and unscripted memories that define your celebration.'}
-              </p>
-
-              <div className="pt-2">
+              <EditorialReveal variant="fade-up" delay={0.16} className="pt-2">
                 <button
                   type="button"
                   onClick={() =>
@@ -148,15 +182,60 @@ export function ServicesOverview({
                       lang === 'sr' ? 'Rođendani i događaji' : 'Birthdays & Events'
                     )
                   }
-                  className="inline-flex items-center gap-2 px-6 py-3 text-xs uppercase tracking-[0.2em] font-medium text-white bg-[#211B17] hover:bg-[#8C5835] transition-colors"
+                  className="group inline-flex items-center gap-2.5 px-6 py-3.5 text-xs uppercase tracking-[0.2em] font-medium text-white bg-[#211B17] hover:bg-[#8C5835] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C5835]"
                 >
                   <span>
                     {lang === 'sr' ? 'Zatraži ponudu za proslavu' : 'Request Event Quote'}
                   </span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1.5" />
                 </button>
-              </div>
+              </EditorialReveal>
             </div>
+
+            <EditorialReveal
+              variant="image-reveal"
+              delay={0.1}
+              parallaxOffset={-8}
+              className="lg:col-span-6"
+            >
+              <div
+                data-service-photo="events-primary"
+                data-selected-photo={eventMainSrc}
+                onClick={() =>
+                  onOpenPhoto(
+                    eventMainSrc,
+                    eventMainTitle,
+                    '18-rodjendani'
+                  )
+                }
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onOpenPhoto(
+                      eventMainSrc,
+                      eventMainTitle,
+                      '18-rodjendani'
+                    );
+                  }
+                }}
+                className="group relative aspect-[2/3] lg:aspect-[4/5] w-full max-w-md mx-auto overflow-hidden bg-[#E0D7CB] cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C5835]"
+              >
+                <Image
+                  src={eventMainSrc}
+                  alt={eventPrimary?.alt[lang] || (lang === 'sr' ? 'Kadar sa proslave rođendana' : 'Birthday celebration frame')}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 480px"
+                  className="object-cover object-top group-hover:scale-[1.055] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/5 transition-colors duration-300" />
+                <div className="absolute bottom-3 left-3 bg-[#1B1613]/85 backdrop-blur-sm px-3 py-1.5 text-[10px] text-stone-200 font-mono tracking-widest uppercase transition-transform duration-300 group-hover:translate-x-1">
+                  {lang === 'sr' ? 'Klikni za galeriju' : 'Click for gallery'}
+                </div>
+              </div>
+            </EditorialReveal>
           </div>
         </div>
       </section>
@@ -169,22 +248,24 @@ export function ServicesOverview({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-6 space-y-6">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-[#8C5835]">
-                <Sparkles className="w-4 h-4" />
-                <span>03 · {lang === 'sr' ? 'Editorial i Lični' : 'Editorial & Personal'}</span>
-              </div>
+              <EditorialReveal variant="heading">
+                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-[#8C5835] mb-4">
+                  <Sparkles className="w-4 h-4" />
+                  <span>03 · {lang === 'sr' ? 'Editorial i Lični' : 'Editorial & Personal'}</span>
+                </div>
 
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#211B17] tracking-tight">
-                {lang === 'sr' ? 'Portreti' : 'Portraits'}
-              </h2>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#211B17] tracking-tight">
+                  {lang === 'sr' ? 'Portreti' : 'Portraits'}
+                </h2>
+              </EditorialReveal>
 
-              <p className="text-sm sm:text-base text-[#6E645A] leading-relaxed">
-                {lang === 'sr'
-                  ? 'Portretna fotografija uz prirodan, intiman i estetski pristup. Bilo da vam je potreban autentičan lični portret, kreativni editorial kadar ili profesionalna fotografija za lični brend, fokusiramo se na vaš karakter i opuštenost.'
-                  : 'Portrait photography shaped with an organic, editorial sensibility. Whether you desire an authentic personal portrait, creative monograph, or personal branding imagery, we prioritize character and comfort.'}
-              </p>
+              <EditorialReveal variant="text" delay={0.08}>
+                <p className="text-sm sm:text-base text-[#6E645A] leading-relaxed">
+                  {t.servicesOverview.portraitsIntro}
+                </p>
+              </EditorialReveal>
 
-              <div className="pt-2">
+              <EditorialReveal variant="fade-up" delay={0.16} className="pt-2">
                 <button
                   type="button"
                   onClick={() =>
@@ -192,41 +273,60 @@ export function ServicesOverview({
                       lang === 'sr' ? 'Portreti' : 'Portraits'
                     )
                   }
-                  className="inline-flex items-center gap-2 px-6 py-3 text-xs uppercase tracking-[0.2em] font-medium text-white bg-[#211B17] hover:bg-[#8C5835] transition-colors"
+                  className="group inline-flex items-center gap-2.5 px-6 py-3.5 text-xs uppercase tracking-[0.2em] font-medium text-white bg-[#211B17] hover:bg-[#8C5835] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C5835]"
                 >
                   <span>
                     {lang === 'sr' ? 'Zakaži portretnu sesiju' : 'Book Portrait Session'}
                   </span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1.5" />
                 </button>
-              </div>
+              </EditorialReveal>
             </div>
 
-            <div className="lg:col-span-6">
+            <EditorialReveal
+              variant="image-reveal"
+              delay={0.12}
+              parallaxOffset={-10}
+              className="lg:col-span-6"
+            >
               <div
+                data-service-photo="portraits-primary"
+                data-selected-photo={portraitMainSrc}
                 onClick={() =>
                   onOpenPhoto(
-                    SITE_CONFIG.images.portrait,
-                    lang === 'sr' ? 'Portreti — Primer kadra' : 'Portraits — Frame example',
-                    'portraits'
+                    portraitMainSrc,
+                    portraitMainTitle,
+                    'portreti'
                   )
                 }
-                className="group relative aspect-[3/4] max-w-md mx-auto overflow-hidden bg-[#E0D7CB] cursor-pointer shadow-sm"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onOpenPhoto(
+                      portraitMainSrc,
+                      portraitMainTitle,
+                      'portreti'
+                    );
+                  }
+                }}
+                className="group relative aspect-[2/3] lg:aspect-[4/5] w-full max-w-md mx-auto overflow-hidden bg-[#E0D7CB] cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C5835]"
               >
                 <Image
-                  src={SITE_CONFIG.images.portrait}
-                  alt={lang === 'sr' ? 'Primer portreta' : 'Portrait example'}
+                  src={portraitMainSrc}
+                  alt={portraitPrimary?.alt[lang] || (lang === 'sr' ? 'Primer portreta' : 'Portrait example')}
                   fill
-                  sizes="(max-width: 1024px) 100vw, 500px"
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 1024px) 100vw, 480px"
+                  className="object-cover object-top group-hover:scale-[1.055] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                <div className="absolute bottom-3 left-3 bg-[#1B1613]/80 backdrop-blur-sm px-3 py-1 text-[10px] text-stone-200 font-mono tracking-widest uppercase">
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/5 transition-colors duration-300" />
+                <div className="absolute bottom-3 left-3 bg-[#1B1613]/85 backdrop-blur-sm px-3 py-1.5 text-[10px] text-stone-200 font-mono tracking-widest uppercase transition-transform duration-300 group-hover:translate-x-1">
                   {lang === 'sr' ? 'Klikni za uvećanje' : 'Click to enlarge'}
                 </div>
               </div>
-            </div>
+            </EditorialReveal>
           </div>
         </div>
       </section>
@@ -234,92 +334,147 @@ export function ServicesOverview({
       {/* 4. Video produkcija i montaža / Video Production & Editing */}
       <section
         id="video"
-        className="py-20 lg:py-28 bg-[#1B1613] text-[#FAF8F5] border-t border-[#2C241E]"
+        className="py-20 lg:py-28 bg-[#1B1613] text-[#F5F0E8] border-t border-[#2C241E]"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-6 space-y-6">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-amber-300">
+          <div className="space-y-10 lg:space-y-12">
+            <EditorialReveal variant="heading">
+              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-[#D4A373] font-medium mb-4">
                 <Video className="w-4 h-4" />
-                <span>04 · {lang === 'sr' ? 'Filmska Estetika' : 'Cinematic Direction'}</span>
+                <span>
+                  04 · {lang === 'sr' ? 'Pokretne Slike i Postprodukcija' : 'Moving Images & Post-Production'}
+                </span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-white tracking-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#F5F0E8] tracking-tight">
                 {lang === 'sr' ? 'Video produkcija i montaža' : 'Video Production & Editing'}
               </h2>
+            </EditorialReveal>
 
-              <p className="text-sm sm:text-base text-stone-300 leading-relaxed">
-                {lang === 'sr'
-                  ? 'Video daje pokret i ton emocijama. Radimo snimanje i kompletnu postprodukciju — selekciju kadrova, ritmičku montažu, pažljivo odabranu muziku i profesionalnu kolor korekciju.'
-                  : 'Film brings movement, rhythm, and sound to emotion. We provide full cinematic capture and complete post-production — pacing, editing, curated licensed music, and fine-art color grading.'}
-              </p>
-
-              <div className="space-y-2 text-xs text-stone-300">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                  <span>{lang === 'sr' ? 'Kratki filmski rezimei i showreel formati' : 'Cinematic highlights & showreels'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                  <span>{lang === 'sr' ? 'Optimizovani formati za YouTube, Instagram i TikTok' : 'Optimized formats for YouTube, Instagram & TikTok'}</span>
-                </div>
-              </div>
-
-              <div className="pt-3 flex flex-wrap items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() =>
-                    onSelectServiceForInquiry(
-                      lang === 'sr' ? 'Video produkcija i montaža' : 'Video Production & Editing'
-                    )
-                  }
-                  className="inline-flex items-center gap-2 px-6 py-3 text-xs uppercase tracking-[0.2em] font-medium text-[#1B1613] bg-[#FAF8F5] hover:bg-white transition-colors"
-                >
-                  <span>{lang === 'sr' ? 'Zatraži video ponudu' : 'Request Film Quote'}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-
-                <a
-                  href={SITE_CONFIG.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 text-xs uppercase tracking-[0.2em] font-medium text-stone-300 hover:text-white border border-stone-700 hover:border-stone-500 transition-colors"
-                >
-                  <span>{lang === 'sr' ? 'YouTube kanal' : 'YouTube Channel'}</span>
-                </a>
-              </div>
-            </div>
-
-            <div className="lg:col-span-6">
-              <div className="relative aspect-video w-full overflow-hidden bg-stone-900 border border-stone-800 shadow-xl group">
-                <Image
-                  src={SITE_CONFIG.images.hero}
-                  alt="Filmski video prikaz"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 600px"
-                  className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-black/40">
-                  <a
-                    href={SITE_CONFIG.youtubeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-14 h-14 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md border border-white/60 flex items-center justify-center text-white transition-transform hover:scale-110 mb-3"
-                    aria-label="Poseti YouTube kanal"
-                  >
-                    <Video className="w-6 h-6 ml-0.5" />
-                  </a>
-                  <span className="text-xs font-mono tracking-widest uppercase text-amber-200">
-                    {lang === 'sr' ? 'YouTube Video Kanal' : 'YouTube Video Channel'}
-                  </span>
-                  <p className="text-[11px] text-stone-300 mt-1 max-w-xs">
+            <div className="flex flex-col lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-12 xl:gap-16 lg:items-stretch">
+              {/* Levi blok: Video produkcija i snimanje */}
+              <EditorialReveal
+                variant="text"
+                delay={0.08}
+                className="scroll-mt-28 flex flex-col justify-between space-y-6"
+              >
+                <div id="video-production" className="scroll-mt-28 space-y-3">
+                  <h3 className="text-xl sm:text-2xl font-serif-editorial font-medium text-[#FAF8F5] tracking-tight">
                     {lang === 'sr'
-                      ? 'Novi video radovi se redovno objavljuju na zvaničnom kanalu.'
-                      : 'New cinematic projects are premiered on our official channel.'}
+                      ? 'Video produkcija i snimanje'
+                      : 'Video Production & Filming'}
+                  </h3>
+
+                  <p className="text-sm sm:text-base text-[#D9D0C5] leading-relaxed">
+                    {t.servicesOverview.videoProductionIntro}
                   </p>
+
+                  <ul className="space-y-1.5 pt-1 text-xs text-[#E8E0D5] font-medium">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A373] shrink-0" />
+                      <span>
+                        {lang === 'sr'
+                          ? 'Snimanje venčanja, privatnih proslava i jubileja'
+                          : 'Filming weddings, private celebrations, and milestones'}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A373] shrink-0" />
+                      <span>
+                        {lang === 'sr'
+                          ? 'Snimanje poslovnih događaja, konferencija i projekata organizacija'
+                          : 'Filming corporate events, conferences, and organizational projects'}
+                      </span>
+                    </li>
+                  </ul>
                 </div>
-              </div>
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onSelectServiceForInquiry(
+                        lang === 'sr' ? 'Video produkcija i snimanje' : 'Video Production & Filming'
+                      )
+                    }
+                    className="group inline-flex items-center gap-2.5 px-6 py-3.5 text-xs uppercase tracking-[0.2em] font-medium text-[#1B1613] bg-[#F5F0E8] hover:bg-white hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A373]"
+                  >
+                    <span>
+                      {lang === 'sr' ? 'Zatraži ponudu za snimanje' : 'Request Filming Quote'}
+                    </span>
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1.5" />
+                  </button>
+                </div>
+              </EditorialReveal>
+
+              {/* Razdelna linija: horizontalna na mobilnom, vertikalna na desktopu */}
+              <div
+                aria-hidden="true"
+                data-video-divider="horizontal"
+                className="lg:hidden my-8 h-px w-full bg-[#332A24]"
+              />
+              <div
+                aria-hidden="true"
+                data-video-divider="vertical"
+                className="hidden lg:block w-px bg-[#332A24] my-2 self-stretch"
+              />
+
+              {/* Desni blok: Video montaža i postprodukcija */}
+              <EditorialReveal
+                variant="text"
+                delay={0.16}
+                className="scroll-mt-28 flex flex-col justify-between space-y-6"
+              >
+                <div id="video-editing" className="scroll-mt-28 space-y-3">
+                  <h3 className="text-xl sm:text-2xl font-serif-editorial font-medium text-[#FAF8F5] tracking-tight">
+                    {lang === 'sr'
+                      ? 'Video montaža i postprodukcija'
+                      : 'Video Editing & Post-Production'}
+                  </h3>
+
+                  <p className="text-sm sm:text-base text-[#D9D0C5] leading-relaxed">
+                    {t.servicesOverview.videoEditingIntro}
+                  </p>
+
+                  <ul className="space-y-1.5 pt-1 text-xs text-[#E8E0D5] font-medium">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A373] shrink-0" />
+                      <span>
+                        {lang === 'sr'
+                          ? 'Selekcija i povezivanje kadrova, obrada boja i usklađivanje zvuka'
+                          : 'Frame selection and assembly, color grading, and sound leveling'}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#D4A373] shrink-0" />
+                      <span>
+                        {lang === 'sr'
+                          ? 'Muzika, titlovi i prilagođavanje za društvene mreže prema dogovoru'
+                          : 'Music, subtitles, and social media adaptation by arrangement'}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onSelectServiceForInquiry(
+                        lang === 'sr'
+                          ? 'Video montaža i postprodukcija'
+                          : 'Video Editing & Post-Production'
+                      )
+                    }
+                    className="group inline-flex items-center gap-2.5 px-5 py-3.5 text-xs uppercase tracking-[0.2em] font-medium text-[#F5F0E8] bg-transparent border border-[#F5F0E8]/35 hover:border-[#D4A373] hover:text-[#D4A373] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A373]"
+                  >
+                    <span>
+                      {lang === 'sr' ? 'Zatraži ponudu za montažu' : 'Request Editing Quote'}
+                    </span>
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1.5" />
+                  </button>
+                </div>
+              </EditorialReveal>
             </div>
           </div>
         </div>
@@ -333,23 +488,24 @@ export function ServicesOverview({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-6 space-y-6">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-[#8C5835]">
-                <Building2 className="w-4 h-4" />
-                <span>05 · {lang === 'sr' ? 'Organizacije i Institucije' : 'Organizations & Institutions'}</span>
-              </div>
+              <EditorialReveal variant="heading">
+                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-[#8C5835] mb-4">
+                  <Building2 className="w-4 h-4" />
+                  <span>05 · {lang === 'sr' ? 'Organizacije i Institucije' : 'Organizations & Institutions'}</span>
+                </div>
 
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#211B17] tracking-tight">
-                {lang === 'sr' ? 'Nevladine organizacije i institucije' : 'NGO & Organizations'}
-              </h2>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial text-[#211B17] tracking-tight">
+                  {lang === 'sr' ? 'Nevladine organizacije i institucije' : 'NGO & Organizations'}
+                </h2>
+              </EditorialReveal>
 
-              <p className="text-sm sm:text-base text-[#6E645A] leading-relaxed">
-                {lang === 'sr'
-                  ? 'Nudimo specijalizovane usluge vizuelnog dokumentovanja za organizacije civilnog društva, fondacije i javne institucije. Razumemo važnost donor reporting-a, profesionalnog vizuelnog identiteta i etičkog pristupa.'
-                  : 'We offer specialized documentary visual coverage for civil society organizations, foundations, and public institutions. We understand the rigor required for donor reporting, press dissemination, and ethical representation.'}
-              </p>
+              <EditorialReveal variant="text" delay={0.08}>
+                <p className="text-sm sm:text-base text-[#6E645A] leading-relaxed">
+                  {t.servicesOverview.ngoIntro}
+                </p>
+              </EditorialReveal>
 
-              {/* Explicitly list the types of documenting services without fabricating past clients */}
-              <div className="space-y-2.5 pt-1">
+              <EditorialReveal variant="text" delay={0.14} className="space-y-2.5 pt-1">
                 <span className="text-[11px] font-mono tracking-wider uppercase text-stone-400 block">
                   {lang === 'sr' ? 'Vrste usluga dokumentovanja:' : 'Types of Documentation Services:'}
                 </span>
@@ -375,51 +531,70 @@ export function ServicesOverview({
                     <span>{lang === 'sr' ? 'Aktivnosti zajednice i inicijative' : 'Community initiatives & dialogues'}</span>
                   </li>
                 </ul>
-              </div>
+              </EditorialReveal>
 
-              <div className="pt-3">
+              <EditorialReveal variant="fade-up" delay={0.22} className="pt-3">
                 <button
                   type="button"
                   onClick={() =>
                     onSelectServiceForInquiry(
-                      lang === 'sr' ? 'Nevladine organizacije' : 'NGO & Organizations'
+                      lang === 'sr' ? 'Nevladine organizacije i institucije' : 'NGO & Organizations'
                     )
                   }
-                  className="inline-flex items-center gap-2 px-6 py-3 text-xs uppercase tracking-[0.2em] font-medium text-white bg-[#211B17] hover:bg-[#8C5835] transition-colors"
+                  className="group inline-flex items-center gap-2.5 px-6 py-3.5 text-xs uppercase tracking-[0.2em] font-medium text-white bg-[#211B17] hover:bg-[#8C5835] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C5835]"
                 >
                   <span>
                     {lang === 'sr' ? 'Pošaljite institucionalni upit' : 'Submit Institutional Inquiry'}
                   </span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1.5" />
                 </button>
-              </div>
+              </EditorialReveal>
             </div>
 
-            <div className="lg:col-span-6">
+            <EditorialReveal
+              variant="image-reveal"
+              delay={0.12}
+              parallaxOffset={-8}
+              className="lg:col-span-6"
+            >
               <div
+                data-service-photo="ngo-primary"
+                data-selected-photo={ngoMainSrc}
                 onClick={() =>
                   onOpenPhoto(
-                    SITE_CONFIG.images.ngo,
-                    lang === 'sr' ? 'Dokumentovanje organizacija — Primer kadra' : 'Institutional Documentation — Frame example',
-                    'ngo'
+                    ngoMainSrc,
+                    ngoMainTitle,
+                    'ngo-organizacije'
                   )
                 }
-                className="group relative aspect-[4/3] w-full overflow-hidden bg-[#E0D7CB] cursor-pointer shadow-sm"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onOpenPhoto(
+                      ngoMainSrc,
+                      ngoMainTitle,
+                      'ngo-organizacije'
+                    );
+                  }
+                }}
+                className="group relative aspect-[2/3] lg:aspect-[4/5] w-full max-w-md mx-auto overflow-hidden bg-[#E0D7CB] cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8C5835]"
               >
                 <Image
-                  src={SITE_CONFIG.images.ngo}
-                  alt={lang === 'sr' ? 'Primer dokumentovanja radionice' : 'Workshop documentation example'}
+                  src={ngoMainSrc}
+                  alt={ngoPrimary?.alt[lang] || (lang === 'sr' ? 'Primer dokumentovanja radionice' : 'Workshop documentation example')}
                   fill
-                  sizes="(max-width: 1024px) 100vw, 600px"
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 1024px) 100vw, 480px"
+                  className="object-cover object-center group-hover:scale-[1.055] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                <div className="absolute bottom-3 left-3 bg-[#1B1613]/80 backdrop-blur-sm px-3 py-1 text-[10px] text-stone-200 font-mono tracking-widest uppercase">
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/5 transition-colors duration-300" />
+                <div className="absolute bottom-3 left-3 bg-[#1B1613]/85 backdrop-blur-sm px-3 py-1.5 text-[10px] text-stone-200 font-mono tracking-widest uppercase transition-transform duration-300 group-hover:translate-x-1">
                   {lang === 'sr' ? 'Klikni za uvećanje' : 'Click to enlarge'}
                 </div>
               </div>
-            </div>
+            </EditorialReveal>
           </div>
         </div>
       </section>

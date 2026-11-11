@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
-import { SITE_CONFIG } from '@/lib/site-config';
+import { buildNextMetadata } from '@/lib/seo';
 
 const serifFont = Cormorant_Garamond({
   subsets: ['latin', 'latin-ext'],
@@ -18,28 +18,14 @@ const sansFont = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: `${SITE_CONFIG.name} — ${SITE_CONFIG.subtitle}`,
-  description: `${SITE_CONFIG.name} — ${SITE_CONFIG.slogan.sr} Zvanični portfolio za fotografske i video usluge u Srbiji i regionu.`,
-  openGraph: {
-    title: `${SITE_CONFIG.name} — ${SITE_CONFIG.subtitle}`,
-    description: SITE_CONFIG.slogan.sr,
-    type: 'website',
-    locale: 'sr_RS',
-    alternateLocale: ['en_US'],
-    siteName: SITE_CONFIG.name,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${SITE_CONFIG.name} — ${SITE_CONFIG.subtitle}`,
-    description: SITE_CONFIG.slogan.sr,
-  },
-  alternates: {
-    languages: {
-      'sr': '/?lang=sr',
-      'en': '/?lang=en',
-    },
+  ...buildNextMetadata('home', 'sr'),
+  icons: {
+    icon: [{ url: '/favicon.png', type: 'image/png' }],
+    shortcut: ['/favicon.png'],
+    apple: [{ url: '/favicon.png', type: 'image/png' }],
   },
 };
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

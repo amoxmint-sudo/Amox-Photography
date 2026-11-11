@@ -16,6 +16,116 @@ export interface ValidationErrors {
   serviceType?: string;
 }
 
+export interface ServiceOptionDefinition {
+  key: string;
+  label: {
+    sr: string;
+    en: string;
+  };
+  aliases: string[];
+}
+
+export const CONTACT_SERVICE_OPTIONS: readonly ServiceOptionDefinition[] = [
+  {
+    key: 'weddings',
+    label: { sr: 'Venčanja', en: 'Weddings' },
+    aliases: ['weddings', 'svadbe', 'venčanja', 'vencanja', 'venčanja / weddings'],
+  },
+  {
+    key: 'events',
+    label: { sr: 'Rođendani i događaji', en: 'Birthdays & Events' },
+    aliases: [
+      'events',
+      'rođendani i događaji',
+      'birthdays & events',
+      'proslave i događaji',
+      'celebrations & events',
+      '18. rođendani',
+      '1. rođendani',
+      'krštenja',
+      'rođendani i događaji / events',
+    ],
+  },
+  {
+    key: 'portraits',
+    label: { sr: 'Portreti', en: 'Portraits' },
+    aliases: ['portraits', 'portreti', 'portreti / portraits'],
+  },
+  {
+    key: 'video-production',
+    label: { sr: 'Video produkcija i snimanje', en: 'Video Production & Filming' },
+    aliases: [
+      'video-production',
+      'video produkcija i snimanje',
+      'video production & filming',
+      'video produkcija i montaža',
+      'video production & editing',
+      'video produkcija',
+      'video production',
+    ],
+  },
+  {
+    key: 'video-editing',
+    label: { sr: 'Video montaža i postprodukcija', en: 'Video Editing & Post-Production' },
+    aliases: [
+      'video-editing',
+      'video montaža i postprodukcija',
+      'video editing & post-production',
+      'video montaža',
+      'video editing',
+    ],
+  },
+  {
+    key: 'ngo',
+    label: { sr: 'Nevladine organizacije i institucije', en: 'NGO & Organizations' },
+    aliases: [
+      'ngo',
+      'ngo-organizacije',
+      'nevladine organizacije i institucije',
+      'nevladine organizacije',
+      'ngo & organizations',
+      'ngos & organizations',
+      'nevladine organizacije / ngo',
+    ],
+  },
+  {
+    key: 'corporate',
+    label: { sr: 'Korporativni događaji', en: 'Corporate Events' },
+    aliases: ['corporate', 'korporativni-dogadjaji', 'korporativni događaji', 'corporate events'],
+  },
+  {
+    key: 'other',
+    label: { sr: 'Drugo / Više usluga', en: 'Other / Multiple Services' },
+    aliases: ['other', 'ostalo', 'drugo / više usluga', 'other / multiple services', 'ostalo / other'],
+  },
+] as const;
+
+/**
+ * Pronalazi kanonsku definiciju usluge na osnovu ključa ili naziva na srpskom/engleskom jeziku.
+ */
+export function findServiceOption(input?: string): ServiceOptionDefinition | undefined {
+  if (!input || !input.trim()) return undefined;
+  const normalized = input.trim().toLowerCase();
+  return CONTACT_SERVICE_OPTIONS.find(
+    (opt) =>
+      opt.key === normalized ||
+      opt.label.sr.toLowerCase() === normalized ||
+      opt.label.en.toLowerCase() === normalized ||
+      opt.aliases.includes(normalized)
+  );
+}
+
+/**
+ * Vraća lokalizovani naziv usluge za prikaz u select polju i u generisanom tekstu upita.
+ */
+export function getLocalizedServiceLabel(serviceInput: string, lang: Language = 'sr'): string {
+  const matched = findServiceOption(serviceInput);
+  if (matched) {
+    return matched.label[lang];
+  }
+  return serviceInput.trim();
+}
+
 export function validateContactForm(
   data: ContactFormData,
   lang: Language = 'sr'
@@ -52,7 +162,11 @@ export function validateContactForm(
 
 export function buildMailtoUrl(data: ContactFormData, lang: Language = 'sr'): string {
   const isSr = lang === 'sr';
-  const serviceLabel = data.serviceType || (isSr ? 'Opšti upit' : 'General Inquiry');
+  const serviceLabel = data.serviceType
+    ? getLocalizedServiceLabel(data.serviceType, lang)
+    : isSr
+    ? 'Opšti upit'
+    : 'General Inquiry';
   const subject = isSr
     ? `[AMOX Upit] ${serviceLabel} - ${data.fullName.trim()}`
     : `[AMOX Inquiry] ${serviceLabel} - ${data.fullName.trim()}`;
@@ -86,7 +200,11 @@ export function buildMailtoUrl(data: ContactFormData, lang: Language = 'sr'): st
 
 export function formatPlainTextInquiry(data: ContactFormData, lang: Language = 'sr'): string {
   const isSr = lang === 'sr';
-  const serviceLabel = data.serviceType || (isSr ? 'Opšti upit' : 'General Inquiry');
+  const serviceLabel = data.serviceType
+    ? getLocalizedServiceLabel(data.serviceType, lang)
+    : isSr
+    ? 'Opšti upit'
+    : 'General Inquiry';
   return [
     `Do: ${SITE_CONFIG.email}`,
     `Naslov: [AMOX] ${serviceLabel} - ${data.fullName.trim()}`,
