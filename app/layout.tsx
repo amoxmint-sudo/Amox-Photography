@@ -18,7 +18,8 @@ const sansFont = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  ...buildNextMetadata('home', 'sr'),
+  ...buildNextMetadata('home', 'sr', 'https://amoxphotography.com'),
+  metadataBase: new URL('https://amoxphotography.com'),
   icons: {
     icon: [{ url: '/favicon.png', type: 'image/png' }],
     shortcut: ['/favicon.png'],

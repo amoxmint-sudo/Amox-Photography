@@ -24,6 +24,7 @@ test('getVerifiedProductionSiteUrl rejects empty, localhost, and ephemeral previ
     getVerifiedProductionSiteUrl('https://amoxphotography.com/'),
     'https://amoxphotography.com'
   );
+  assert.equal(getVerifiedProductionSiteUrl(), 'https://amoxphotography.com');
 });
 
 test('resolveLanguageFromSearchParams defaults to sr and recognizes en', () => {

@@ -5,7 +5,7 @@ export const SITE_CONFIG = {
     sr: 'Svaka priča ima svoj kadar.',
     en: 'Every Story Has Its Frame.',
   },
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || '',
+  siteUrl: 'https://amoxphotography.com',
   email: 'amoxmint@gmail.com',
   phone: '+381629247415',
   whatsappUrl: 'https://wa.me/381629247415',

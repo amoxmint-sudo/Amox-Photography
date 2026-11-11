@@ -30,15 +30,23 @@ export interface PageSeoConfig {
   };
 }
 
+export const DEFAULT_SITE_URL = 'https://amoxphotography.com';
+
 /**
- * Vraća verifikovani produkcijski domen samo ako je eksplicitno konfigurisan
- * (npr. putem NEXT_PUBLIC_SITE_URL) i nije lokalni ili privremeni preview URL (*.run.app).
- * Nikada ne izmišlja domen.
+ * Vraća verifikovani produkcijski domen (podrazumevano https://amoxphotography.com)
+ * i odbacuje lokalne ili privremene preview URL-ove (*.run.app) kada su eksplicitno prosleđeni.
  */
 export function getVerifiedProductionSiteUrl(rawUrl?: string): string {
-  const candidate = (
-    rawUrl !== undefined ? rawUrl : process.env.NEXT_PUBLIC_SITE_URL || ''
-  ).trim();
+  if (rawUrl === undefined) {
+    const envVal = (process.env.NEXT_PUBLIC_SITE_URL || '').trim();
+    if (envVal) {
+      const verifiedEnv = getVerifiedProductionSiteUrl(envVal);
+      if (verifiedEnv) return verifiedEnv;
+    }
+    return DEFAULT_SITE_URL;
+  }
+
+  const candidate = rawUrl.trim();
 
   if (!candidate) return '';
 

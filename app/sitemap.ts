@@ -1,18 +1,14 @@
 import { MetadataRoute } from 'next';
-import { getVerifiedProductionSiteUrl } from '@/lib/seo';
+
+const BASE_URL = 'https://amoxphotography.com';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = getVerifiedProductionSiteUrl();
-  if (!baseUrl) {
-    return [];
-  }
-
   const routes = ['', '/moja-prica'];
   const now = new Date();
 
   return routes.flatMap((route) => {
-    const srUrl = `${baseUrl}${route || '/'}`;
-    const enUrl = `${baseUrl}${route || '/'}?lang=en`;
+    const srUrl = `${BASE_URL}${route || '/'}`;
+    const enUrl = `${BASE_URL}${route || '/'}?lang=en`;
     const alternates = {
       languages: {
         sr: srUrl,
