@@ -149,7 +149,7 @@ export const PORTFOLIO_CATEGORIES: PortfolioServiceCategory[] = [
       sr: 'Pogledaj video produkciju',
       en: 'Explore video production',
     },
-    coverImage: SITE_CONFIG.images.about,
+    coverImage: SITE_CONFIG.images.videoProduction,
   },
   {
     id: 'video-editing',
@@ -166,7 +166,7 @@ export const PORTFOLIO_CATEGORIES: PortfolioServiceCategory[] = [
       sr: 'Detalji o postprodukciji',
       en: 'Post-production details',
     },
-    coverImage: SITE_CONFIG.images.portrait,
+    coverImage: SITE_CONFIG.images.videoEditing,
   },
   {
     id: 'ngo',

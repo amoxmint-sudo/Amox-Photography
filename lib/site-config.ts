@@ -23,11 +23,13 @@ export const SITE_CONFIG = {
   },
   images: {
     hero: '/photos/portreti/AMX04056.jpg',
-    about: '/images/about_photographer_portrait_1792654920192.jpg',
+    about: '/images/Moja Prica.jpg',
     wedding: '/photos/svadbe/AMX03291-Edit.jpg',
     event: '/photos/18-rodjendani/AMX09846.jpg',
-    portrait: '/images/portfolio_portrait_1792654921293.jpg',
-    ngo: '/images/portfolio_ngo_1792654950876.jpg',
+    portrait: '/images/Fotografije.jpg',
+    videoProduction: '/images/Sniamnje.jpg',
+    videoEditing: '/images/Editing.jpg',
+    ngo: '/images/NGO.jpg',
   },
 } as const;
 
