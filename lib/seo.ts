@@ -82,6 +82,40 @@ export function resolveLanguageFromSearchParams(
   return value === 'en' ? 'en' : 'sr';
 }
 
+export const LOCAL_SEO_KEYWORDS_SR = [
+  'fotograf surdulica',
+  'fotograf Surdulica',
+  'fotograf vladicin han',
+  'fotograf Vladičin Han',
+  'fotograf vranje',
+  'fotograf Vranje',
+  'fotograf leskovac',
+  'fotograf Leskovac',
+  'fotograf nis',
+  'fotograf Niš',
+  'fotograf za svadbe surdulica',
+  'fotograf za svadbe vranje',
+  'fotograf za svadbe vladicin han',
+  'fotograf za svadbe leskovac',
+  'fotograf za svadbe nis',
+  'fotografisanje vencanja',
+  'fotografisanje 18 rodjendana',
+  'video produkcija i snimanje',
+  'Amox Photography',
+];
+
+export const LOCAL_SEO_KEYWORDS_EN = [
+  'photographer Surdulica',
+  'photographer Vladicin Han',
+  'photographer Vranje',
+  'photographer Leskovac',
+  'photographer Nis',
+  'wedding photographer Serbia',
+  'event photographer Serbia',
+  'video production Serbia',
+  'Amox Photography',
+];
+
 const SEO_COPY: Record<
   SeoPageKey,
   Record<
@@ -103,71 +137,71 @@ const SEO_COPY: Record<
 > = {
   home: {
     sr: {
-      title: 'AMOX Photography & Film — Fotografija i video produkcija',
+      title: 'Amox Photography — Fotografija i video produkcija',
       description:
-        'Autentična fotografija i video produkcija za venčanja, proslave, portrete, događaje i organizacije u Srbiji i regionu. Svaka priča ima svoj kadar.',
-      ogTitle: 'AMOX Photography & Film — Fotografija i video produkcija',
+        'Autentična fotografija i video produkcija za venčanja, proslave, portrete i događaje — Surdulica, Vladičin Han, Vranje, Leskovac, Niš i Srbija. Svaka priča ima svoj kadar.',
+      ogTitle: 'Amox Photography — Fotografija i video produkcija',
       ogDescription:
-        'Autentična fotografija i video produkcija za venčanja, proslave, portrete, događaje i organizacije u Srbiji i regionu. Svaka priča ima svoj kadar.',
+        'Autentična fotografija i video produkcija za venčanja, proslave, portrete i događaje — Surdulica, Vladičin Han, Vranje, Leskovac, Niš i Srbija. Svaka priča ima svoj kadar.',
       ogType: 'website',
       ogLocale: 'sr_RS',
       alternateLocale: ['en_US'],
-      ogImage: SITE_CONFIG.images.hero,
+      ogImage: SITE_CONFIG.images.about,
       ogImageWidth: 1200,
-      ogImageHeight: 800,
+      ogImageHeight: 1500,
       ogImageAlt:
-        'AMOX Photography & Film — autentična fotografija i video produkcija',
+        'Amox Photography — autentična fotografija i video produkcija',
     },
     en: {
-      title: 'AMOX Photography & Film — Photography & Video Production',
+      title: 'Amox Photography — Photography & Video Production',
       description:
-        'Authentic wedding, event, portrait, and documentary photography and video production across Serbia and the region. Every story has its frame.',
-      ogTitle: 'AMOX Photography & Film — Photography & Video Production',
+        'Authentic wedding, event, portrait, and documentary photography and video production across Surdulica, Vladičin Han, Vranje, Leskovac, Niš, and Serbia. Every story has its frame.',
+      ogTitle: 'Amox Photography — Photography & Video Production',
       ogDescription:
-        'Authentic wedding, event, portrait, and documentary photography and video production across Serbia and the region. Every story has its frame.',
+        'Authentic wedding, event, portrait, and documentary photography and video production across Surdulica, Vladičin Han, Vranje, Leskovac, Niš, and Serbia. Every story has its frame.',
       ogType: 'website',
       ogLocale: 'en_US',
       alternateLocale: ['sr_RS'],
-      ogImage: SITE_CONFIG.images.hero,
+      ogImage: SITE_CONFIG.images.about,
       ogImageWidth: 1200,
-      ogImageHeight: 800,
+      ogImageHeight: 1500,
       ogImageAlt:
-        'AMOX Photography & Film — authentic photography and video production',
+        'Amox Photography — authentic photography and video production',
     },
   },
   'moja-prica': {
     sr: {
       title:
-        'Moja priča — Autorski profil i iskustvo | AMOX Photography & Film',
+        'Moja priča — Autorski profil i iskustvo | Amox Photography',
       description:
-        'Upoznajte autorski pristup, izabrane filmske, festivalske i izlagačke projekte, kreativni proces i alate iza brenda AMOX Photography & Film.',
+        'Upoznajte autorski pristup, izabrane filmske, festivalske i izlagačke projekte, kreativni proces i alate iza brenda Amox Photography (Surdulica, Vladičin Han, Vranje, Leskovac, Niš).',
       ogTitle:
-        'Moja priča — Autorski profil i iskustvo | AMOX Photography & Film',
+        'Moja priča — Autorski profil i iskustvo | Amox Photography',
       ogDescription:
         'Fotografija, video i vizuelne priče: autorski profil, izabrano iskustvo (Obruč, Monaco Yacht Show, Rock Garden, Overload), kreativni proces i alati.',
       ogType: 'profile',
       ogLocale: 'sr_RS',
       alternateLocale: ['en_US'],
       ogImage: SITE_CONFIG.images.about,
-      ogImageWidth: 896,
-      ogImageHeight: 1200,
-      ogImageAlt: 'AMOX Photography & Film — autorski vizuelni arhiv',
+      ogImageWidth: 1200,
+      ogImageHeight: 1500,
+      ogImageAlt: 'Amox Photography — autorski vizuelni arhiv',
     },
     en: {
-      title: 'My Story — Author Profile & Experience | AMOX Photography & Film',
+      title: 'My Story — Author Profile & Experience | Amox Photography',
       description:
-        'Discover the author profile, selected film, festival, and exhibition projects, creative process, and tools behind AMOX Photography & Film.',
+        'Discover the author profile, selected film, festival, and exhibition projects, creative process, and tools behind Amox Photography.',
       ogTitle:
-        'My Story — Author Profile & Experience | AMOX Photography & Film',
+        'My Story — Author Profile & Experience | Amox Photography',
       ogDescription:
         'Photography, video, and visual stories: author profile, selected experience (Obruč, Monaco Yacht Show, Rock Garden, Overload), creative process, and tools.',
       ogType: 'profile',
       ogLocale: 'en_US',
       alternateLocale: ['sr_RS'],
       ogImage: SITE_CONFIG.images.about,
-      ogImageWidth: 896,
-      ogImageHeight: 1200,
-      ogImageAlt: 'AMOX Photography & Film — visual archive frame',
+      ogImageWidth: 1200,
+      ogImageHeight: 1500,
+      ogImageAlt: 'Amox Photography — visual archive frame',
     },
   },
 };
@@ -209,21 +243,24 @@ export function buildNextMetadata(
 ): Metadata {
   const cfg = getPageSeoConfig(page, lang, rawSiteUrl);
   const verifiedOrigin = getVerifiedProductionSiteUrl(rawSiteUrl);
+  const encodedImagePath = encodeURI(cfg.ogImage);
   const resolvedOgImageUrl = verifiedOrigin
-    ? `${verifiedOrigin}${cfg.ogImage}`
-    : cfg.ogImage;
+    ? `${verifiedOrigin}${encodedImagePath}`
+    : encodedImagePath;
 
   return {
     ...(verifiedOrigin ? { metadataBase: new URL(verifiedOrigin) } : {}),
+    applicationName: 'Amox Photography',
     title: cfg.title,
     description: cfg.description,
+    keywords: lang === 'en' ? LOCAL_SEO_KEYWORDS_EN : LOCAL_SEO_KEYWORDS_SR,
     openGraph: {
       title: cfg.ogTitle,
       description: cfg.ogDescription,
       type: cfg.ogType,
       locale: cfg.ogLocale,
       alternateLocale: cfg.alternateLocale,
-      siteName: SITE_CONFIG.name,
+      siteName: 'Amox Photography',
       ...(cfg.ogUrl ? { url: cfg.ogUrl } : {}),
       images: [
         {
@@ -239,6 +276,11 @@ export function buildNextMetadata(
       title: cfg.ogTitle,
       description: cfg.ogDescription,
       images: [resolvedOgImageUrl],
+    },
+    other: {
+      thumbnail: resolvedOgImageUrl,
+      'geo.region': 'RS',
+      'geo.placename': 'Surdulica, Vladičin Han, Vranje, Leskovac, Niš',
     },
     alternates: {
       ...(cfg.canonicalUrl ? { canonical: cfg.canonicalUrl } : {}),
@@ -358,6 +400,10 @@ export function buildPageJsonLd(
 ): Record<string, unknown> {
   const verifiedOrigin = getVerifiedProductionSiteUrl(rawSiteUrl);
   const cfg = getPageSeoConfig(page, lang, rawSiteUrl);
+  const encodedAboutImage = encodeURI(SITE_CONFIG.images.about);
+  const resolvedAboutImageUrl = verifiedOrigin
+    ? `${verifiedOrigin}${encodedAboutImage}`
+    : encodedAboutImage;
 
   if (page === 'moja-prica') {
     const story = MY_STORY_CONTENT[lang];
@@ -368,11 +414,18 @@ export function buildPageJsonLd(
       name: cfg.title,
       description: cfg.description,
       ...(cfg.canonicalUrl ? { url: cfg.canonicalUrl } : {}),
+      primaryImageOfPage: {
+        '@type': 'ImageObject',
+        url: resolvedAboutImageUrl,
+        width: 1200,
+        height: 1500,
+      },
       mainEntity: {
         '@type': 'Organization',
-        name: SITE_CONFIG.name,
-        alternateName: `${SITE_CONFIG.name} — ${SITE_CONFIG.subtitle}`,
+        name: 'Amox Photography',
+        alternateName: 'Amox Photography & Film',
         description: story.hero.intro,
+        image: resolvedAboutImageUrl,
         email: SITE_CONFIG.email,
         telephone: SITE_CONFIG.phone,
         sameAs: [
@@ -389,18 +442,51 @@ export function buildPageJsonLd(
     '@context': 'https://schema.org',
     '@graph': [
       {
+        '@type': 'WebSite',
+        name: 'Amox Photography',
+        alternateName: ['Amox Photography & Film', 'AMOX Photography'],
+        inLanguage: lang,
+        ...(verifiedOrigin ? { url: verifiedOrigin } : {}),
+      },
+      {
         '@type': 'ProfessionalService',
-        name: SITE_CONFIG.name,
-        alternateName: `${SITE_CONFIG.name} — ${SITE_CONFIG.subtitle}`,
+        additionalType: 'https://schema.org/Photographer',
+        name: 'Amox Photography',
+        alternateName: 'Amox Photography & Film',
         inLanguage: lang,
         description: cfg.description,
         slogan: SITE_CONFIG.slogan[lang],
         email: SITE_CONFIG.email,
         telephone: SITE_CONFIG.phone,
         ...(verifiedOrigin ? { url: verifiedOrigin } : {}),
-        image: verifiedOrigin
-          ? `${verifiedOrigin}${SITE_CONFIG.images.hero}`
-          : SITE_CONFIG.images.hero,
+        image: resolvedAboutImageUrl,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Surdulica',
+          addressRegion: 'Južna Srbija',
+          addressCountry: 'RS',
+        },
+        areaServed: [
+          { '@type': 'City', name: 'Surdulica' },
+          { '@type': 'City', name: 'Vladičin Han', alternateName: 'Vladicin Han' },
+          { '@type': 'City', name: 'Vranje' },
+          { '@type': 'City', name: 'Leskovac' },
+          { '@type': 'City', name: 'Niš', alternateName: 'Nis' },
+          { '@type': 'Country', name: 'Srbija' },
+        ],
+        knowsAbout: [
+          'Fotograf Surdulica',
+          'Fotograf Vladičin Han',
+          'Fotograf Vladicin Han',
+          'Fotograf Vranje',
+          'Fotograf Leskovac',
+          'Fotograf Niš',
+          'Fotograf Nis',
+          'Fotografisanje venčanja i svadbi',
+          'Fotografisanje 18. rođendana i proslava',
+          'Portretna fotografija',
+          'Video produkcija i montaža',
+        ],
         sameAs: [
           SITE_CONFIG.instagramUrl,
           SITE_CONFIG.youtubeUrl,

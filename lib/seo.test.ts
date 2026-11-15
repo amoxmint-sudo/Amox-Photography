@@ -199,7 +199,7 @@ test('syncDocumentSeoMetadata updates all existing SEO tags across SR -> EN -> S
     assert.equal(mockDocument.documentElement.lang, 'en');
     assert.equal(
       mockDocument.title,
-      'AMOX Photography & Film — Photography & Video Production'
+      'Amox Photography — Photography & Video Production'
     );
     assert.equal(
       elementsBySelector.get('meta[property="og:locale"]')?.attrs.content,
@@ -211,11 +211,11 @@ test('syncDocumentSeoMetadata updates all existing SEO tags across SR -> EN -> S
     );
     assert.equal(
       elementsBySelector.get('meta[property="og:image:alt"]')?.attrs.content,
-      'AMOX Photography & Film — authentic photography and video production'
+      'Amox Photography — authentic photography and video production'
     );
     assert.equal(
       elementsBySelector.get('meta[name="twitter:image:alt"]')?.attrs.content,
-      'AMOX Photography & Film — authentic photography and video production'
+      'Amox Photography — authentic photography and video production'
     );
     // Unchanged because preview domain was rejected
     assert.equal(
@@ -239,7 +239,7 @@ test('syncDocumentSeoMetadata updates all existing SEO tags across SR -> EN -> S
     assert.equal(mockDocument.documentElement.lang, 'sr');
     assert.equal(
       mockDocument.title,
-      'AMOX Photography & Film — Fotografija i video produkcija'
+      'Amox Photography — Fotografija i video produkcija'
     );
     assert.equal(
       elementsBySelector.get('meta[property="og:locale"]')?.attrs.content,
@@ -251,7 +251,7 @@ test('syncDocumentSeoMetadata updates all existing SEO tags across SR -> EN -> S
     );
     assert.equal(
       elementsBySelector.get('meta[property="og:image:alt"]')?.attrs.content,
-      'AMOX Photography & Film — autentična fotografija i video produkcija'
+      'Amox Photography — autentična fotografija i video produkcija'
     );
     assert.equal(
       elementsBySelector.get('link[rel="canonical"]')?.attrs.href,
@@ -269,12 +269,40 @@ test('syncDocumentSeoMetadata updates all existing SEO tags across SR -> EN -> S
   }
 });
 
-test('buildPageJsonLd generates valid Schema.org structured data for home and moja-prica in SR and EN', () => {
-  const homeJsonSr = buildPageJsonLd('home', 'sr', '');
-  const storyJsonEn = buildPageJsonLd('moja-prica', 'en', '');
+test('buildPageJsonLd generates valid Schema.org structured data for home and moja-prica in SR and EN with Amox Photography and O meni image', () => {
+  const homeJsonSr = buildPageJsonLd('home', 'sr', 'https://amoxphotography.com');
+  const storyJsonEn = buildPageJsonLd('moja-prica', 'en', 'https://amoxphotography.com');
+  const homeMetaSr = buildNextMetadata('home', 'sr', 'https://amoxphotography.com');
 
   assert.equal(homeJsonSr['@context'], 'https://schema.org');
   assert.ok(Array.isArray(homeJsonSr['@graph']));
+  const graph = homeJsonSr['@graph'] as Record<string, unknown>[];
+  assert.equal(graph[0]['@type'], 'WebSite');
+  assert.equal(graph[0].name, 'Amox Photography');
+  assert.equal(graph[1]['@type'], 'ProfessionalService');
+  assert.equal(graph[1].name, 'Amox Photography');
+  assert.equal(
+    graph[1].image,
+    'https://amoxphotography.com/images/Moja%20Prica.jpg'
+  );
+
+  const areaServed = graph[1].areaServed as Array<{ name: string }>;
+  const servedNames = areaServed.map((a) => a.name);
+  for (const city of ['Surdulica', 'Vladičin Han', 'Vranje', 'Leskovac', 'Niš']) {
+    assert.ok(servedNames.includes(city), `Missing areaServed city: ${city}`);
+  }
+
+  const keywords = homeMetaSr.keywords as string[];
+  for (const kw of [
+    'fotograf surdulica',
+    'fotograf vladicin han',
+    'fotograf vranje',
+    'fotograf leskovac',
+    'fotograf nis',
+  ]) {
+    assert.ok(keywords.includes(kw), `Missing keyword: ${kw}`);
+  }
+
   assert.equal(storyJsonEn['@context'], 'https://schema.org');
   assert.equal(storyJsonEn['@type'], 'ProfilePage');
   assert.equal(storyJsonEn.inLanguage, 'en');
