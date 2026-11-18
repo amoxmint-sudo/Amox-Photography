@@ -1,5 +1,5 @@
 export const SITE_CONFIG = {
-  name: 'AMOX PHOTOGRAPHY',
+  name: 'Amox Photography',
   subtitle: 'Photography & Film',
   slogan: {
     sr: 'Svaka priča ima svoj kadar.',
@@ -23,7 +23,7 @@ export const SITE_CONFIG = {
   },
   images: {
     hero: '/photos/portreti/AMX04056.jpg',
-    about: '/images/Moja Prica.jpg',
+    about: '/images/amox-photography.jpg',
     wedding: '/photos/svadbe/AMX03291-Edit.jpg',
     event: '/photos/18-rodjendani/AMX09846.jpg',
     portrait: '/images/Fotografije.jpg',

@@ -35,10 +35,11 @@ export function AboutSection({
                 src={SITE_CONFIG.images.about}
                 alt={
                   lang === 'sr'
-                    ? 'AMOX Photography & Film — autorski portret iza objektiva'
-                    : 'AMOX Photography & Film — photographer portrait behind the lens'
+                    ? 'Amox Photography — autentična fotografija i video produkcija'
+                    : 'Amox Photography — authentic photography and video production'
                 }
                 fill
+                priority
                 sizes="(max-width: 768px) 100vw, 500px"
                 className="object-cover object-center grayscale-[15%] group-hover:grayscale-0 group-hover:scale-[1.035] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 referrerPolicy="no-referrer"

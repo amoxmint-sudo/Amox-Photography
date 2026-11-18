@@ -44,9 +44,10 @@ export function Preloader() {
 
   return (
     <div
+      data-nosnippet
       role="status"
       aria-live="polite"
-      aria-label="Učitavanje AMOX Photography sajta"
+      aria-label="Učitavanje Amox Photography sajta"
       className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#1B1613] text-[#FAF8F5] pointer-events-none select-none overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
         exiting ? 'opacity-0 scale-[1.02]' : 'opacity-100 scale-100'
       }`}

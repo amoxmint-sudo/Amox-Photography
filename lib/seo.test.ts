@@ -283,7 +283,11 @@ test('buildPageJsonLd generates valid Schema.org structured data for home and mo
   assert.equal(graph[1].name, 'Amox Photography');
   assert.equal(
     graph[1].image,
-    'https://amoxphotography.com/images/Moja%20Prica.jpg'
+    'https://amoxphotography.com/images/amox-photography.jpg'
+  );
+  assert.equal(
+    (homeMetaSr.other as Record<string, string>)?.thumbnail,
+    'https://amoxphotography.com/images/amox-photography.jpg'
   );
 
   const areaServed = graph[1].areaServed as Array<{ name: string }>;

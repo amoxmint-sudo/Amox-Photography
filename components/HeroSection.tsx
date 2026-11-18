@@ -32,6 +32,7 @@ export function HeroSection({
     >
       {/* 1 & 2. Main background photograph with gradual fade-in and slow cinematic camera zoom */}
       <motion.div
+        data-nosnippet
         initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.04 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.35, ease: [0.16, 1, 0.3, 1] }}
@@ -42,11 +43,10 @@ export function HeroSection({
             src={SITE_CONFIG.images.hero}
             alt={
               lang === 'sr'
-                ? 'AMOX Photography & Film — autentična fotografija i video produkcija'
-                : 'AMOX Photography & Film — authentic photography and video production'
+                ? 'Uvodni pozadinski kadar u sali'
+                : 'Opening background frame in theater hall'
             }
             fill
-            priority
             sizes="100vw"
             className="object-cover object-[58%_42%] sm:object-[55%_45%] lg:object-center brightness-[0.72] contrast-[1.05]"
             referrerPolicy="no-referrer"
